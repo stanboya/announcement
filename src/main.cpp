@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include "tools.h"
+#include "announce.h"
 
 static struct option long_options[] = {
     {"verbose",     no_argument,       0, 'v'},
@@ -50,6 +51,23 @@ int main(int argc, char **argv) {
                 return EXIT_SUCCESS;
         }
     }
+
+    std::vector<std::vector<std::vector<int32_t>>> goals;
+
+    std::vector<std::vector<int32_t>> goal_1;
+    std::vector<std::vector<int32_t>> goal_2;
+
+    goal_1.emplace_back(std::vector<int32_t>{1, 2, 3, 4});
+    goal_1.emplace_back(std::vector<int32_t>{2, 3, 4, 5});
+    goal_1.emplace_back(std::vector<int32_t>{4, 5, 6});
+
+    goal_2.emplace_back(std::vector<int32_t>{7, 8});
+    goal_2.emplace_back(std::vector<int32_t>{9});
+
+    goals.emplace_back(goal_1);
+    goals.emplace_back(goal_2);
+
+    std::cout << goals_consistent(goals) << "\n";
 
     return EXIT_SUCCESS;
 }

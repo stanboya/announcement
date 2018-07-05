@@ -12,6 +12,7 @@ struct agent {
 
 void find_announcement(const std::vector<agent>& agents) noexcept;
 
+bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goals) noexcept;
 
 
 #endif
