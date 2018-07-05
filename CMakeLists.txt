@@ -19,6 +19,8 @@ set(ANNOUNCE_SRCS
     src/file.h
     src/utils.cpp
     src/utils.h
+    src/announce.cpp
+    src/announce.h
 )
 
 add_custom_target(glucose COMMAND make r
