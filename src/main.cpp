@@ -2,8 +2,13 @@
 #include <cstdlib>
 #include <cstdint>
 #include <variant>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
 #include <unistd.h>
 #include <getopt.h>
+#include "tools.h"
 
 static struct option long_options[] = {
     {"verbose",     no_argument,       0, 'v'},

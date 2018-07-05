@@ -13,6 +13,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(ANNOUNCE_SRCS
     src/main.cpp
+    src/tools.cpp
+    src/tools.h
 )
 
 add_custom_target(glucose COMMAND make r
