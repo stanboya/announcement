@@ -1,0 +1,3 @@
+[submodule "belief_revise"]
+	path = belief_revise
+	url = https://github.com/JohnAgapeyev/belief_revise
