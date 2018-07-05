@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5.1)
-project(belief_revise)
+project(announce)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -11,26 +11,20 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-set(BELIEF_REV_SOURCES
+set(ANNOUNCE_SRCS
     src/main.cpp
-    src/file.cpp
-    src/belief.cpp
-    src/interactive.cpp
-    src/utils.cpp
 )
 
-add_custom_target(minisat_all COMMAND make r
-                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/minisat_all
+add_custom_target(glucose COMMAND make r
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/sat/parallel
 )
 
-add_executable(belief_rev ${BELIEF_REV_SOURCES})
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/belief_revise)
 
-find_package(OpenSSL)
+add_executable(announce ${ANNOUNCE_SRCS})
 
-target_link_libraries(belief_rev OpenSSL::SSL OpenSSL::Crypto)
-
-target_include_directories(belief_rev PRIVATE
+target_include_directories(announce PRIVATE
     src
 )
 
-add_dependencies(belief_rev minisat_all)
+add_dependencies(announce glucose)

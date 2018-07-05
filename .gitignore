@@ -72,8 +72,12 @@ CTestTestfile.cmake
 # Bin directory
 bin/
 
-# Minisat All directory
-minisat_all
+# Glucose Directory
+sat/
+
+#Glucose build files
+*.or
+*.mk
 
 # Working output files
 .tmp.input
