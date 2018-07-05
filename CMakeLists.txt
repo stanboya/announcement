@@ -15,6 +15,10 @@ set(ANNOUNCE_SRCS
     src/main.cpp
     src/tools.cpp
     src/tools.h
+    src/file.cpp
+    src/file.h
+    src/utils.cpp
+    src/utils.h
 )
 
 add_custom_target(glucose COMMAND make r
