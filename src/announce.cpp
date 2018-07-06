@@ -35,6 +35,30 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
         }
         //Now test_case is a n bit brute force generating DNF formulas
         //Need to do belief revision on this and compare with goals
+        std::vector<std::vector<int32_t>> revision_formula;
+        revision_formula.emplace_back(std::move(test_case));
+
+        for (const auto& agent : agents) {
+            auto revised = belief_revise(agent.beliefs, revision_formula);
+            const auto abs_cmp = [](const auto a, const auto b){return std::abs(a) < std::abs(b);};
+            for (auto& clause : revised) {
+                std::sort(clause.begin(), clause.end(), abs_cmp);
+            }
+            std::sort(revised.begin(), revised.end());
+            if (!std::includes(revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
+                //Revised beliefs does not include the goal
+                goto bad_result;
+            }
+        }
+        std::cout << "Found an announcement that works\n";
+        for (const auto& clause : revision_formula) {
+            for (const auto term : clause) {
+                std::cout << term << " " << "\n";
+            }
+        }
+        return;
+bad_result:
+        continue;
     }
 }
 
