@@ -75,6 +75,9 @@ bin/
 # Glucose Directory
 sat/
 
+# Qt autogen directory
+announce_autogen/
+
 #Glucose build files
 *.or
 *.mk

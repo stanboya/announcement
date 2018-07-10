@@ -24,8 +24,11 @@
 #include <iterator>
 #include <unistd.h>
 #include <getopt.h>
+#include <QApplication>
+#include <QPushButton>
 #include "tools.h"
 #include "announce.h"
+#include "interactive.h"
 
 static struct option long_options[] = {
     {"verbose",     no_argument,       0, 'v'},
@@ -44,7 +47,7 @@ static struct option long_options[] = {
 
 int main(int argc, char **argv) {
     const char *output_file = nullptr;
-    bool verbose = false;
+    verbose = false;
     for (;;) {
         int c;
         int option_index = 0;
@@ -82,6 +85,13 @@ int main(int argc, char **argv) {
     goals.emplace_back(goal_2);
 
     std::cout << goals_consistent(goals) << "\n";
+
+#if 1
+    QApplication app(argc, argv);
+    QPushButton b("Hello world!");
+    b.show();
+    app.exec();
+#endif
 
     return EXIT_SUCCESS;
 }
