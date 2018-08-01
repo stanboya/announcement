@@ -35,6 +35,16 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
     if (goals_consistent(goals)) {
         std::cout << "Goals are consistent\n";
 
+        for (const auto& agent : agents) {
+            for (const auto& clause : agent.goal) {
+                for (const auto term : clause) {
+                    std::cout << term << " ";
+                }
+                std::cout << "\n";
+            }
+            std::cout << "\n";
+        }
+
         std::vector<std::vector<int32_t>> conjunction;
         std::vector<std::vector<int32_t>> base_goal{goals.front()};
 
@@ -58,12 +68,25 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
 
         const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
 
+#if 1
         //Remove duplicates and empties, while sorting the 2d vector
         for (auto& clause : conjunction) {
             std::sort(clause.begin(), clause.end(), abs_cmp);
-            clause.erase(
-                std::unique(clause.begin(), clause.end(),
-                    [](const auto lhs, const auto rhs) { return std::abs(lhs) == std::abs(rhs); }),
+            clause.erase(std::unique(clause.begin(), clause.end()), clause.end());
+
+            std::vector<int32_t> remove_vals;
+            for (const auto term : clause) {
+                if (std::find(clause.cbegin(), clause.cend(), term * -1) != clause.cend()) {
+                    remove_vals.emplace_back(std::abs(term));
+                }
+            }
+
+            clause.erase(std::remove_if(clause.begin(), clause.begin(),
+                             [&](const auto term) {
+                                 return std::find(
+                                            remove_vals.begin(), remove_vals.end(), std::abs(term))
+                                     != remove_vals.end();
+                             }),
                 clause.end());
         }
         std::sort(conjunction.begin(), conjunction.end());
@@ -71,6 +94,7 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
         conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(),
                               [](const auto& clause) { return clause.empty(); }),
             conjunction.end());
+#endif
 
         print_formula_dnf(conjunction);
 
@@ -149,9 +173,21 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
     //Remove duplicates and empties, while sorting the 2d vector
     for (auto& clause : conjunction) {
         std::sort(clause.begin(), clause.end(), abs_cmp);
-        clause.erase(
-            std::unique(clause.begin(), clause.end(),
-                [](const auto lhs, const auto rhs) { return std::abs(lhs) == std::abs(rhs); }),
+        clause.erase(std::unique(clause.begin(), clause.end()), clause.end());
+
+        std::vector<int32_t> remove_vals;
+        for (const auto term : clause) {
+            if (std::find(clause.cbegin(), clause.cend(), term * -1) != clause.cend()) {
+                remove_vals.emplace_back(std::abs(term));
+            }
+        }
+
+        clause.erase(std::remove_if(clause.begin(), clause.begin(),
+                         [&](const auto term) {
+                             return std::find(
+                                        remove_vals.begin(), remove_vals.end(), std::abs(term))
+                                 != remove_vals.end();
+                         }),
             clause.end());
     }
     std::sort(conjunction.begin(), conjunction.end());

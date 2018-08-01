@@ -92,6 +92,10 @@ void print_formula_dnf(const std::vector<std::vector<int32_t>>& formula) noexcep
 std::vector<std::vector<int32_t>> convert_normal_forms(const std::vector<std::vector<int32_t>>& normal_clauses) noexcept {
     std::vector<std::vector<int32_t>> result;
 
+    if (normal_clauses.empty()) {
+        return normal_clauses;
+    }
+
     std::cout << "Conversion called with size " << normal_clauses.size() << "\n";
 
     assert(normal_clauses.size() >= 2);
