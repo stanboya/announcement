@@ -56,6 +56,22 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
             conjunction = std::move(base_goal);
         }
 
+        const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
+
+        //Remove duplicates and empties, while sorting the 2d vector
+        for (auto& clause : conjunction) {
+            std::sort(clause.begin(), clause.end(), abs_cmp);
+            clause.erase(
+                std::unique(clause.begin(), clause.end(),
+                    [](const auto lhs, const auto rhs) { return std::abs(lhs) == std::abs(rhs); }),
+                clause.end());
+        }
+        std::sort(conjunction.begin(), conjunction.end());
+        conjunction.erase(std::unique(conjunction.begin(), conjunction.end()), conjunction.end());
+        conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(),
+                              [](const auto& clause) { return clause.empty(); }),
+            conjunction.end());
+
         print_formula_dnf(conjunction);
 
         return;
@@ -95,16 +111,13 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
             }
         }
         std::cout << "Found an announcement that works\n";
-        for (const auto& clause : revision_formula) {
-            for (const auto term : clause) {
-                std::cout << term << " "
-                          << "\n";
-            }
-        }
+        print_formula_dnf(revision_formula);
         return;
     bad_result:
         continue;
     }
+
+    std::cout << "No possible satisfying assignment was found\n";
 }
 
 //Goals must be vector of DNF formulas
@@ -131,9 +144,23 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
         conjunction = std::move(base_goal);
     }
 
-    conjunction = convert_normal_forms(conjunction);
-
     const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
+
+    //Remove duplicates and empties, while sorting the 2d vector
+    for (auto& clause : conjunction) {
+        std::sort(clause.begin(), clause.end(), abs_cmp);
+        clause.erase(
+            std::unique(clause.begin(), clause.end(),
+                [](const auto lhs, const auto rhs) { return std::abs(lhs) == std::abs(rhs); }),
+            clause.end());
+    }
+    std::sort(conjunction.begin(), conjunction.end());
+    conjunction.erase(std::unique(conjunction.begin(), conjunction.end()), conjunction.end());
+    conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(),
+                          [](const auto& clause) { return clause.empty(); }),
+        conjunction.end());
+
+    conjunction = convert_normal_forms(conjunction);
 
     //Remove duplicates and empties, while sorting the 2d vector
     for (auto& clause : conjunction) {

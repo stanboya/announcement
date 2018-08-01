@@ -92,6 +92,8 @@ void print_formula_dnf(const std::vector<std::vector<int32_t>>& formula) noexcep
 std::vector<std::vector<int32_t>> convert_normal_forms(const std::vector<std::vector<int32_t>>& normal_clauses) noexcept {
     std::vector<std::vector<int32_t>> result;
 
+    std::cout << "Conversion called with size " << normal_clauses.size() << "\n";
+
     assert(normal_clauses.size() >= 2);
 
     if (normal_clauses.size() == 2) {
@@ -118,6 +120,13 @@ std::vector<std::vector<int32_t>> convert_normal_forms(const std::vector<std::ve
             //Sort the result in variable order
             std::sort(clause.begin(), clause.end(), [](const auto lhs, const auto rhs){return std::abs(lhs) < std::abs(rhs);});
         }
+        std::sort(result.begin(), result.end());
+        result.erase(std::unique(result.begin(), result.end()), result.end());
+        result.erase(std::remove_if(result.begin(), result.end(), [](const auto& clause){return clause.empty();}), result.end());
+        result.shrink_to_fit();
+
+        std::cout << "Step finished\n";
+        std::cout << "New size " << result.size() << "\n";
         return result;
     }
 }

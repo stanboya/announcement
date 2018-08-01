@@ -69,31 +69,12 @@ int main(int argc, char **argv) {
         }
     }
 
-    std::vector<std::vector<std::vector<int32_t>>> goals;
-
-    std::vector<std::vector<int32_t>> goal_1;
-    std::vector<std::vector<int32_t>> goal_2;
-
-    goal_1.emplace_back(std::vector<int32_t>{1, 2, 3});
-
-    goal_2.emplace_back(std::vector<int32_t>{-2});
-    goal_2.emplace_back(std::vector<int32_t>{-3});
-
-    goals.emplace_back(goal_1);
-    goals.emplace_back(goal_2);
-
-    std::cout << goals_consistent(goals) << "\n";
-
-#if 1
     QApplication app(argc, argv);
-    //QPushButton b("Hello world!");
-    //b.show();
 
     MainWindow m{};
     m.show();
 
     app.exec();
-#endif
 
     return EXIT_SUCCESS;
 }
