@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>545</height>
+    <height>525</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Belief Announcement Solver</string>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>false</bool>
@@ -120,22 +120,6 @@
      </item>
     </layout>
    </widget>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
-     <height>19</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuBelief_Announcement_Solver">
-    <property name="title">
-     <string>Belief Announcement Solver</string>
-    </property>
-   </widget>
-   <addaction name="menuBelief_Announcement_Solver"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

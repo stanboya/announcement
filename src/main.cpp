@@ -14,37 +14,34 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <iostream>
-#include <cstdlib>
-#include <cstdint>
-#include <variant>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
-#include <iterator>
-#include <unistd.h>
-#include <getopt.h>
 #include <QApplication>
 #include <QPushButton>
-#include "tools.h"
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <fstream>
+#include <getopt.h>
+#include <iostream>
+#include <iterator>
+#include <sstream>
+#include <unistd.h>
+#include <variant>
+
+#include "UI/mainwindow.h"
 #include "announce.h"
 #include "interactive.h"
-#include "UI/mainwindow.h"
+#include "tools.h"
 
-static struct option long_options[] = {
-    {"verbose",     no_argument,       0, 'v'},
-    {"output",      required_argument, 0, 'o'},
-    {0,             0,                 0,  0}
-};
+static struct option long_options[]
+    = {{"verbose", no_argument, 0, 'v'}, {"output", required_argument, 0, 'o'}, {0, 0, 0, 0}};
 
 #define print_help() \
     do { \
-        printf("usage options:\n"\
-                "\t [v]erbose               - Output in verbose mode\n"\
-                "\t [o]utput                - File to output revised beliefse to\n"\
-                "\t [h]elp                  - this message\n"\
-                );\
-    } while(0)
+        printf("usage options:\n" \
+               "\t [v]erbose               - Output in verbose mode\n" \
+               "\t [o]utput                - File to output revised beliefse to\n" \
+               "\t [h]elp                  - this message\n"); \
+    } while (0)
 
 int main(int argc, char **argv) {
     const char *output_file = nullptr;
@@ -100,4 +97,3 @@ int main(int argc, char **argv) {
 
     return EXIT_SUCCESS;
 }
-

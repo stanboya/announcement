@@ -65,6 +65,7 @@ target_compile_options(announce PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_OPTIONS}>
 
 target_include_directories(announce PRIVATE
     src
+    src/UI
 )
 
 add_dependencies(announce glucose)
