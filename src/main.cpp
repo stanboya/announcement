@@ -29,6 +29,7 @@
 #include "tools.h"
 #include "announce.h"
 #include "interactive.h"
+#include "UI/mainwindow.h"
 
 static struct option long_options[] = {
     {"verbose",     no_argument,       0, 'v'},
@@ -88,8 +89,12 @@ int main(int argc, char **argv) {
 
 #if 1
     QApplication app(argc, argv);
-    QPushButton b("Hello world!");
-    b.show();
+    //QPushButton b("Hello world!");
+    //b.show();
+
+    MainWindow m{};
+    m.show();
+
     app.exec();
 #endif
 
