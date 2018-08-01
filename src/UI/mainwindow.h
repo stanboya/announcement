@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <vector>
+#include "announce.h"
 
 namespace Ui {
     class MainWindow;
@@ -23,6 +25,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
+    std::vector<agent> agent_list;
 };
 
 #endif // MAINWINDOW_H
