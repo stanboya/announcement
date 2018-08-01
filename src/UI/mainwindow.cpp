@@ -21,24 +21,22 @@ void MainWindow::on_add_entry_clicked() {
     QString beliefs = QInputDialog::getText(this, tr("Initial Agent Beliefs"),
         tr("Initial Beliefs:"), QLineEdit::Normal, QDir::home().dirName(), &ok);
 
-    if (ok && !beliefs.isEmpty()) {
-        std::cout << beliefs.toStdString() << "\n";
+    if (!ok || beliefs.isEmpty()) {
+        return;
     }
+
     QString goals = QInputDialog::getText(this, tr("Desired Agent Goal"), tr("Desired Goal:"),
         QLineEdit::Normal, QDir::home().dirName(), &ok);
 
-    if (ok && !goals.isEmpty()) {
-        std::cout << goals.toStdString() << "\n";
+    if (!ok || goals.isEmpty()) {
+        return;
     }
-
-    std::cout << "Done info gathering\n";
-
     ui->data_table->insertRow(ui->data_table->rowCount());
     QTableWidgetItem *item = new QTableWidgetItem();
     item->setCheckState(Qt::Unchecked);
     ui->data_table->setItem(ui->data_table->rowCount() - 1, 0, item);
     ui->data_table->setItem(
-        ui->data_table->rowCount() - 1, 1, new QTableWidgetItem(QString::number(7)));
+        ui->data_table->rowCount() - 1, 1, new QTableWidgetItem(QString::number(ui->data_table->rowCount())));
     ui->data_table->setItem(ui->data_table->rowCount() - 1, 2, new QTableWidgetItem(beliefs));
     ui->data_table->setItem(ui->data_table->rowCount() - 1, 3, new QTableWidgetItem(goals));
 }
@@ -52,6 +50,9 @@ void MainWindow::on_remove_entry_clicked() {
                 ui->data_table->removeRow(i);
             }
         }
+    }
+    for (int i = 0; i < ui->data_table->rowCount(); ++i) {
+        ui->data_table->item(i, 1)->setText(QString::number(i + 1));
     }
 }
 
