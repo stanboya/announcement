@@ -176,7 +176,7 @@ std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<in
 
     system("./bin/belief_rev -b .tmp.input -f .tmp.output -o .tmp.2");
 
-    std::ifstream ifs{output_filename};
+    std::ifstream ifs{".tmp.2"};
     if (!ifs) {
         std::cerr << "Unable to open results file\n";
         exit(EXIT_FAILURE);
