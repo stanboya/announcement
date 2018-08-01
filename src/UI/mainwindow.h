@@ -19,7 +19,7 @@ private slots:
 
     void on_remove_entry_clicked();
 
-    void on_calculate_annoouncement_clicked();
+    void on_calculate_announcement_clicked();
 
 private:
     Ui::MainWindow *ui;

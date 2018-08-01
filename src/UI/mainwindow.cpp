@@ -1,5 +1,5 @@
-#include <QInputDialog>
 #include <QDir>
+#include <QInputDialog>
 #include <QTableWidgetItem>
 #include <iostream>
 
@@ -18,8 +18,8 @@ MainWindow::~MainWindow() {
 
 void MainWindow::on_add_entry_clicked() {
     bool ok;
-    QString beliefs = QInputDialog::getText(this, tr("Initial Agent Beliefs"), tr("Initial Beliefs:"),
-        QLineEdit::Normal, QDir::home().dirName(), &ok);
+    QString beliefs = QInputDialog::getText(this, tr("Initial Agent Beliefs"),
+        tr("Initial Beliefs:"), QLineEdit::Normal, QDir::home().dirName(), &ok);
 
     if (ok && !beliefs.isEmpty()) {
         std::cout << beliefs.toStdString() << "\n";
@@ -37,20 +37,24 @@ void MainWindow::on_add_entry_clicked() {
     QTableWidgetItem *item = new QTableWidgetItem();
     item->setCheckState(Qt::Unchecked);
     ui->data_table->setItem(ui->data_table->rowCount() - 1, 0, item);
-    ui->data_table->setItem(ui->data_table->rowCount() - 1, 1, new QTableWidgetItem(QString::number(7)));
+    ui->data_table->setItem(
+        ui->data_table->rowCount() - 1, 1, new QTableWidgetItem(QString::number(7)));
     ui->data_table->setItem(ui->data_table->rowCount() - 1, 2, new QTableWidgetItem(beliefs));
     ui->data_table->setItem(ui->data_table->rowCount() - 1, 3, new QTableWidgetItem(goals));
 }
 
 void MainWindow::on_remove_entry_clicked() {
-    QItemSelectionModel *selectionModel = ui->data_table->selectionModel();
-    QModelIndexList selectedRows = selectionModel->selectedRows();
-    if (selectedRows.size() > 0) {
-        // There is at lease one selected row.
-        std::cout << "Have something to remove\n";
+    for (int i = 0; i < ui->data_table->rowCount(); ++i) {
+        for (int j = 0; j < ui->data_table->columnCount(); ++j) {
+            QTableWidgetItem *item = ui->data_table->item(i, j);
+            if (item && item->checkState() == Qt::Checked) {
+                std::cout << "Remove element at " << i << ", " << j << "\n";
+                ui->data_table->removeRow(i);
+            }
+        }
     }
 }
 
-void MainWindow::on_calculate_annoouncement_clicked() {
+void MainWindow::on_calculate_announcement_clicked() {
     std::cout << "\n";
 }
