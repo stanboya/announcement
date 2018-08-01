@@ -47,7 +47,14 @@ bool sat(const std::vector<std::vector<int32_t>>& clause_list) noexcept {
         }
     }
 
-    system("./sat/parallel/glucose-syrup_release .tmp.input 2> /dev/null | grep -o 's [SU]' > .tmp.output");
+    bool trying_parallel = true;
+
+retry:
+    if (trying_parallel) {
+        system("./sat/parallel/glucose-syrup_release .tmp.input 2> /dev/null | grep -o 's [SU]' > .tmp.output");
+    } else {
+        system("./sat/simp/glucose_release .tmp.input 2> /dev/null | grep -o 's [SU]' > .tmp.output");
+    }
 
     std::ifstream ifs{output_filename};
     if (!ifs) {
@@ -71,6 +78,10 @@ bool sat(const std::vector<std::vector<int32_t>>& clause_list) noexcept {
                     exit(EXIT_FAILURE);
             }
         }
+    }
+    if (trying_parallel) {
+        trying_parallel = false;
+        goto retry;
     }
     std::cerr << "SAT solver did not return proper output format\n";
     exit(EXIT_FAILURE);
@@ -147,8 +158,9 @@ std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<in
             std::copy(clause.cbegin(), clause.cend(), std::ostream_iterator<int32_t>(ofs, " "));
             ofs << "0\n";
         }
-
-        ofs = std::ofstream{output_filename, std::ios_base::out | std::ios_base::trunc};
+    }
+    {
+        std::ofstream ofs{output_filename, std::ios_base::out | std::ios_base::trunc};
         if (!ofs) {
             std::cerr << "Unable to open output file\n";
             exit(EXIT_FAILURE);

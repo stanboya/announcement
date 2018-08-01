@@ -61,6 +61,15 @@ std::vector<std::vector<int32_t>> convert_to_num(const std::vector<std::vector<b
 
 void print_formula_dnf(const std::vector<std::vector<int32_t>>& formula) noexcept {
     for (const auto& clause : formula) {
+        for (const auto term : clause) {
+            std::cout << term << " ";
+        }
+        std::cout << "\n";
+    }
+
+
+
+    for (const auto& clause : formula) {
         std::cout << '(';
         for (const auto term : clause) {
             if (term < 0) {

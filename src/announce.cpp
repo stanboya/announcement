@@ -14,15 +14,16 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <cstdint>
-#include <vector>
 #include <algorithm>
-#include <iostream>
-#include <climits>
 #include <cassert>
-#include "utils.h"
-#include "tools.h"
+#include <climits>
+#include <cstdint>
+#include <iostream>
+#include <vector>
+
 #include "announce.h"
+#include "tools.h"
+#include "utils.h"
 
 void find_announcement(const std::vector<agent>& agents) noexcept {
     std::vector<std::vector<std::vector<int32_t>>> goals;
@@ -33,9 +34,34 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
 
     if (goals_consistent(goals)) {
         std::cout << "Goals are consistent\n";
-        //Need to handle/print them here
+
+        std::vector<std::vector<int32_t>> conjunction;
+        std::vector<std::vector<int32_t>> base_goal{goals.front()};
+
+        for (const auto& goal : goals) {
+            if (goal == goals.front()) {
+                continue;
+            }
+            for (const auto& base_clause : base_goal) {
+                for (const auto& clause : goal) {
+                    std::vector<int32_t> appended{base_clause};
+                    appended.insert(appended.end(), clause.begin(), clause.end());
+                    conjunction.emplace_back(std::move(appended));
+                }
+            }
+        }
+
+        //Conjunction will be empty when the only goal is a single term function
+        if (conjunction.empty()) {
+            conjunction = std::move(base_goal);
+        }
+
+        print_formula_dnf(conjunction);
+
         return;
     }
+
+    std::cout << "Goals are inconsistent, trying to find a solution\n";
 
     const auto max_var = get_variable_count(agents);
     assert(max_var <= 64);
@@ -56,12 +82,14 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
 
         for (const auto& agent : agents) {
             auto revised = belief_revise(agent.beliefs, revision_formula);
-            const auto abs_cmp = [](const auto a, const auto b){return std::abs(a) < std::abs(b);};
+            const auto abs_cmp
+                = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
             for (auto& clause : revised) {
                 std::sort(clause.begin(), clause.end(), abs_cmp);
             }
             std::sort(revised.begin(), revised.end());
-            if (!std::includes(revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
+            if (!std::includes(
+                    revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
                 //Revised beliefs does not include the goal
                 goto bad_result;
             }
@@ -69,11 +97,12 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
         std::cout << "Found an announcement that works\n";
         for (const auto& clause : revision_formula) {
             for (const auto term : clause) {
-                std::cout << term << " " << "\n";
+                std::cout << term << " "
+                          << "\n";
             }
         }
         return;
-bad_result:
+    bad_result:
         continue;
     }
 }
@@ -97,9 +126,14 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
         }
     }
 
+    //Conjunction will be empty when the only goal is a single term function
+    if (conjunction.empty()) {
+        conjunction = std::move(base_goal);
+    }
+
     conjunction = convert_normal_forms(conjunction);
 
-    const auto abs_cmp = [](const auto a, const auto b){return std::abs(a) < std::abs(b);};
+    const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
 
     //Remove duplicates and empties, while sorting the 2d vector
     for (auto& clause : conjunction) {
@@ -108,7 +142,9 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
     }
     std::sort(conjunction.begin(), conjunction.end());
     conjunction.erase(std::unique(conjunction.begin(), conjunction.end()), conjunction.end());
-    conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(), [](const auto& clause){return clause.empty();}), conjunction.end());
+    conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(),
+                          [](const auto& clause) { return clause.empty(); }),
+        conjunction.end());
 
     if (conjunction.empty()) {
         return false;
@@ -136,4 +172,3 @@ int32_t get_variable_count(const std::vector<agent>& agents) noexcept {
     }
     return max_variable_count;
 }
-

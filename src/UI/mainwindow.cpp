@@ -75,5 +75,7 @@ void MainWindow::on_remove_entry_clicked() {
 }
 
 void MainWindow::on_calculate_announcement_clicked() {
-    std::cout << "\n";
+    if (!agent_list.empty()) {
+        find_announcement(agent_list);
+    }
 }
