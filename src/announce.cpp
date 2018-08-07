@@ -66,35 +66,7 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
             conjunction = std::move(base_goal);
         }
 
-        const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
-
-#if 1
-        //Remove duplicates and empties, while sorting the 2d vector
-        for (auto& clause : conjunction) {
-            std::sort(clause.begin(), clause.end(), abs_cmp);
-            clause.erase(std::unique(clause.begin(), clause.end()), clause.end());
-
-            std::vector<int32_t> remove_vals;
-            for (const auto term : clause) {
-                if (std::find(clause.cbegin(), clause.cend(), term * -1) != clause.cend()) {
-                    remove_vals.emplace_back(std::abs(term));
-                }
-            }
-
-            clause.erase(std::remove_if(clause.begin(), clause.begin(),
-                                 [&](const auto term) {
-                                     return std::find(remove_vals.begin(), remove_vals.end(),
-                                                    std::abs(term))
-                                             != remove_vals.end();
-                                 }),
-                    clause.end());
-        }
-        std::sort(conjunction.begin(), conjunction.end());
-        conjunction.erase(std::unique(conjunction.begin(), conjunction.end()), conjunction.end());
-        conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(),
-                                  [](const auto& clause) { return clause.empty(); }),
-                conjunction.end());
-#endif
+        simplify_dnf(conjunction);
 
         print_formula_dnf(conjunction);
 
@@ -145,7 +117,7 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
                     agent.goal.end(), std::back_inserter(intersection));
 
             //if (!std::includes(
-                        //revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
+            //revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
             if (intersection.empty()) {
                 //Revised beliefs does not include the goal
                 goto bad_result;
@@ -188,46 +160,9 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
         conjunction = std::move(base_goal);
     }
 
-    const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
-
-    //Remove duplicates and empties, while sorting the 2d vector
-    for (auto& clause : conjunction) {
-        std::sort(clause.begin(), clause.end(), abs_cmp);
-        clause.erase(std::unique(clause.begin(), clause.end()), clause.end());
-
-        std::vector<int32_t> remove_vals;
-        for (const auto term : clause) {
-            if (std::find(clause.cbegin(), clause.cend(), term * -1) != clause.cend()) {
-                remove_vals.emplace_back(std::abs(term));
-            }
-        }
-
-        clause.erase(
-                std::remove_if(clause.begin(), clause.begin(),
-                        [&](const auto term) {
-                            return std::find(remove_vals.begin(), remove_vals.end(), std::abs(term))
-                                    != remove_vals.end();
-                        }),
-                clause.end());
-    }
-    std::sort(conjunction.begin(), conjunction.end());
-    conjunction.erase(std::unique(conjunction.begin(), conjunction.end()), conjunction.end());
-    conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(),
-                              [](const auto& clause) { return clause.empty(); }),
-            conjunction.end());
+    simplify_dnf(conjunction);
 
     conjunction = convert_normal_forms(conjunction);
-
-    //Remove duplicates and empties, while sorting the 2d vector
-    for (auto& clause : conjunction) {
-        std::sort(clause.begin(), clause.end(), abs_cmp);
-        clause.erase(std::unique(clause.begin(), clause.end()), clause.end());
-    }
-    std::sort(conjunction.begin(), conjunction.end());
-    conjunction.erase(std::unique(conjunction.begin(), conjunction.end()), conjunction.end());
-    conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(),
-                              [](const auto& clause) { return clause.empty(); }),
-            conjunction.end());
 
     if (conjunction.empty()) {
         return false;

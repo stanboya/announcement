@@ -185,7 +185,6 @@ std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<in
     std::vector<std::vector<int32_t>> output_states;
 
     for (std::string line; std::getline(ifs, line);) {
-        std::cout << "Belief output: " << line << "\n";
         std::istringstream iss{std::move(line)};
 
         std::vector<int32_t> clause_tokens;

@@ -14,24 +14,27 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <vector>
-#include <cstdint>
-#include <cmath>
 #include <algorithm>
-#include <iostream>
-#include <cassert>
-#include <utility>
 #include <bitset>
+#include <cassert>
+#include <cmath>
+#include <cstdint>
+#include <iostream>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "utils.h"
 
-std::vector<std::vector<bool>> convert_to_bool(const std::vector<std::vector<int32_t>>& state) noexcept {
+std::vector<std::vector<bool>> convert_to_bool(
+        const std::vector<std::vector<int32_t>>& state) noexcept {
     std::vector<std::vector<bool>> output;
 
     for (const auto& clause : state) {
-        const auto max_term = std::abs(*std::max_element(clause.cbegin(), clause.cend(), [](const auto& lhs, const auto& rhs){return std::abs(lhs) < std::abs(rhs);}));
-        std::vector<bool> converted_term{static_cast<unsigned long>(max_term), false, std::allocator<bool>()};
+        const auto max_term = std::abs(*std::max_element(clause.cbegin(), clause.cend(),
+                [](const auto& lhs, const auto& rhs) { return std::abs(lhs) < std::abs(rhs); }));
+        std::vector<bool> converted_term{
+                static_cast<unsigned long>(max_term), false, std::allocator<bool>()};
         for (const auto term : clause) {
             converted_term[std::abs(term) - 1] = (term > 0);
         }
@@ -41,7 +44,8 @@ std::vector<std::vector<bool>> convert_to_bool(const std::vector<std::vector<int
     return output;
 }
 
-std::vector<std::vector<int32_t>> convert_to_num(const std::vector<std::vector<bool>>& state) noexcept {
+std::vector<std::vector<int32_t>> convert_to_num(
+        const std::vector<std::vector<bool>>& state) noexcept {
     std::vector<std::vector<int32_t>> output;
 
     for (const auto& clause : state) {
@@ -67,8 +71,6 @@ void print_formula_dnf(const std::vector<std::vector<int32_t>>& formula) noexcep
         std::cout << "\n";
     }
 
-
-
     for (const auto& clause : formula) {
         std::cout << '(';
         for (const auto term : clause) {
@@ -89,7 +91,8 @@ void print_formula_dnf(const std::vector<std::vector<int32_t>>& formula) noexcep
 }
 
 //This applies the distributive property to convert between DNF and CNF DIMACS formats
-std::vector<std::vector<int32_t>> convert_normal_forms(const std::vector<std::vector<int32_t>>& normal_clauses) noexcept {
+std::vector<std::vector<int32_t>> convert_normal_forms(
+        const std::vector<std::vector<int32_t>>& normal_clauses) noexcept {
     std::vector<std::vector<int32_t>> result;
 
     if (normal_clauses.empty()) {
@@ -111,7 +114,8 @@ std::vector<std::vector<int32_t>> convert_normal_forms(const std::vector<std::ve
         return result;
     } else {
         //Get the result excluding the first clause
-        const auto prev_result = convert_normal_forms({std::next(normal_clauses.begin()), normal_clauses.end()});
+        const auto prev_result
+                = convert_normal_forms({std::next(normal_clauses.begin()), normal_clauses.end()});
         for (const auto term : normal_clauses.front()) {
             for (const auto& clause : prev_result) {
                 //Add the first level term to the existing conversion
@@ -122,11 +126,14 @@ std::vector<std::vector<int32_t>> convert_normal_forms(const std::vector<std::ve
         }
         for (auto& clause : result) {
             //Sort the result in variable order
-            std::sort(clause.begin(), clause.end(), [](const auto lhs, const auto rhs){return std::abs(lhs) < std::abs(rhs);});
+            std::sort(clause.begin(), clause.end(),
+                    [](const auto lhs, const auto rhs) { return std::abs(lhs) < std::abs(rhs); });
         }
         std::sort(result.begin(), result.end());
         result.erase(std::unique(result.begin(), result.end()), result.end());
-        result.erase(std::remove_if(result.begin(), result.end(), [](const auto& clause){return clause.empty();}), result.end());
+        result.erase(std::remove_if(result.begin(), result.end(),
+                             [](const auto& clause) { return clause.empty(); }),
+                result.end());
         result.shrink_to_fit();
 
         std::cout << "Step finished\n";
@@ -136,7 +143,8 @@ std::vector<std::vector<int32_t>> convert_normal_forms(const std::vector<std::ve
 }
 
 //Converts the input bits to DNF format - It's a 1-to-1 mapping
-std::vector<std::vector<int32_t>> convert_raw(const std::vector<std::vector<bool>>& input_bits) noexcept {
+std::vector<std::vector<int32_t>> convert_raw(
+        const std::vector<std::vector<bool>>& input_bits) noexcept {
     std::vector<std::vector<int32_t>> output;
     output.reserve(input_bits.size());
 
@@ -157,14 +165,15 @@ std::vector<std::vector<int32_t>> convert_raw(const std::vector<std::vector<bool
 //Eg. A and B only specifies the first 2 bits, but if there are 8 variables, then those other 6 could be any state, hence the need for padding
 //So padding will be necessary, unfortunately
 //This will greatly slow things down if the examples are simple
-std::vector<std::vector<bool>> convert_dnf_to_raw(const std::vector<std::vector<int32_t>>& clause_list) noexcept {
+std::vector<std::vector<bool>> convert_dnf_to_raw(
+        const std::vector<std::vector<int32_t>>& clause_list) noexcept {
     std::unordered_set<std::vector<bool>> output_set;
     output_set.reserve(clause_list.size());
 
     int32_t variable_count = INT32_MIN;
 #pragma omp parallel shared(output_set, variable_count)
     {
-#pragma omp for schedule(static) reduction(max: variable_count) nowait
+#pragma omp for schedule(static) reduction(max : variable_count) nowait
         for (auto it = clause_list.cbegin(); it < clause_list.cend(); ++it) {
             for (auto it2 = it->cbegin(); it2 < it->cend(); ++it2) {
                 variable_count = std::max(variable_count, std::abs(*it2));
@@ -174,7 +183,8 @@ std::vector<std::vector<bool>> convert_dnf_to_raw(const std::vector<std::vector<
 #pragma omp for schedule(static) nowait
         for (auto it = clause_list.cbegin(); it < clause_list.cend(); ++it) {
             //Fill the converted state to have variable_count falses
-            std::vector<bool> converted_state{static_cast<unsigned long>(variable_count), false, std::allocator<bool>()};
+            std::vector<bool> converted_state{
+                    static_cast<unsigned long>(variable_count), false, std::allocator<bool>()};
 
             std::unordered_set<int32_t> variable_set;
             for (const auto term : *it) {
@@ -202,8 +212,42 @@ std::vector<std::vector<bool>> convert_dnf_to_raw(const std::vector<std::vector<
         }
     }
 
-    std::vector<std::vector<bool>> output{std::make_move_iterator(output_set.begin()), std::make_move_iterator(output_set.end())};
+    std::vector<std::vector<bool>> output{
+            std::make_move_iterator(output_set.begin()), std::make_move_iterator(output_set.end())};
 
     return output;
 }
 
+void simplify_dnf(std::vector<std::vector<int32_t>>& formula) noexcept {
+    const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
+
+    //Remove duplicates and empties, while sorting the 2d vector
+    for (auto& clause : formula) {
+        std::sort(clause.begin(), clause.end(), abs_cmp);
+        clause.erase(std::unique(clause.begin(), clause.end()), clause.end());
+
+        std::vector<int32_t> remove_vals;
+        for (const auto term : clause) {
+            if (std::find(clause.cbegin(), clause.cend(), term * -1) != clause.cend()) {
+                remove_vals.emplace_back(term);
+            }
+        }
+
+        if (remove_vals.empty()) {
+            continue;
+        }
+
+        clause.erase(
+                std::remove_if(clause.begin(), clause.begin(),
+                        [&](const auto term) {
+                            return std::find(remove_vals.begin(), remove_vals.end(), std::abs(term))
+                                    != remove_vals.end();
+                        }),
+                clause.end());
+    }
+    std::sort(formula.begin(), formula.end());
+    formula.erase(std::unique(formula.begin(), formula.end()), formula.end());
+    formula.erase(std::remove_if(formula.begin(), formula.end(),
+                          [](const auto& clause) { return clause.empty(); }),
+            formula.end());
+}

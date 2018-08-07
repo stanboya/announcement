@@ -34,4 +34,6 @@ std::vector<std::vector<int32_t>> convert_raw(const std::vector<std::vector<bool
 //Converts between DNF vectors and bool vectors
 std::vector<std::vector<bool>> convert_dnf_to_raw(const std::vector<std::vector<int32_t>>& clause_list) noexcept;
 
+void simplify_dnf(std::vector<std::vector<int32_t>>& formula) noexcept;
+
 #endif
