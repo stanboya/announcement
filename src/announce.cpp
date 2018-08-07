@@ -82,18 +82,18 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
             }
 
             clause.erase(std::remove_if(clause.begin(), clause.begin(),
-                             [&](const auto term) {
-                                 return std::find(
-                                            remove_vals.begin(), remove_vals.end(), std::abs(term))
-                                     != remove_vals.end();
-                             }),
-                clause.end());
+                                 [&](const auto term) {
+                                     return std::find(remove_vals.begin(), remove_vals.end(),
+                                                    std::abs(term))
+                                             != remove_vals.end();
+                                 }),
+                    clause.end());
         }
         std::sort(conjunction.begin(), conjunction.end());
         conjunction.erase(std::unique(conjunction.begin(), conjunction.end()), conjunction.end());
         conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(),
-                              [](const auto& clause) { return clause.empty(); }),
-            conjunction.end());
+                                  [](const auto& clause) { return clause.empty(); }),
+                conjunction.end());
 #endif
 
         print_formula_dnf(conjunction);
@@ -123,16 +123,36 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
         for (const auto& agent : agents) {
             auto revised = belief_revise(agent.beliefs, revision_formula);
             const auto abs_cmp
-                = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
+                    = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
             for (auto& clause : revised) {
                 std::sort(clause.begin(), clause.end(), abs_cmp);
             }
             std::sort(revised.begin(), revised.end());
-            if (!std::includes(
-                    revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
+
+            /*
+             * Since belief revision and the goals are both DNF, goal contains a set of possible outcomes
+             * So rather than checking logical equivalence if all outcomes are represented, I should check
+             * to see if the revised belief in the set of goal outcomes, which would accomplish the goal.
+             *
+             * So if the goal says 1 is true and 2 is either true or false, then it doesn't matter that the
+             * revision only return 1 and not 2, since that is one possible state of the goal due to being DNF.
+             * So it's equivalent, and thus, a valid solution.
+             */
+
+            std::vector<std::vector<int32_t>> intersection;
+
+            std::set_intersection(revised.begin(), revised.end(), agent.goal.begin(),
+                    agent.goal.end(), std::back_inserter(intersection));
+
+            //if (!std::includes(
+                        //revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
+            if (intersection.empty()) {
                 //Revised beliefs does not include the goal
                 goto bad_result;
             }
+
+            print_formula_dnf(revised);
+            print_formula_dnf(agent.goal);
         }
         std::cout << "Found an announcement that works\n";
         print_formula_dnf(revision_formula);
@@ -182,19 +202,19 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
             }
         }
 
-        clause.erase(std::remove_if(clause.begin(), clause.begin(),
-                         [&](const auto term) {
-                             return std::find(
-                                        remove_vals.begin(), remove_vals.end(), std::abs(term))
-                                 != remove_vals.end();
-                         }),
-            clause.end());
+        clause.erase(
+                std::remove_if(clause.begin(), clause.begin(),
+                        [&](const auto term) {
+                            return std::find(remove_vals.begin(), remove_vals.end(), std::abs(term))
+                                    != remove_vals.end();
+                        }),
+                clause.end());
     }
     std::sort(conjunction.begin(), conjunction.end());
     conjunction.erase(std::unique(conjunction.begin(), conjunction.end()), conjunction.end());
     conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(),
-                          [](const auto& clause) { return clause.empty(); }),
-        conjunction.end());
+                              [](const auto& clause) { return clause.empty(); }),
+            conjunction.end());
 
     conjunction = convert_normal_forms(conjunction);
 
@@ -206,8 +226,8 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
     std::sort(conjunction.begin(), conjunction.end());
     conjunction.erase(std::unique(conjunction.begin(), conjunction.end()), conjunction.end());
     conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(),
-                          [](const auto& clause) { return clause.empty(); }),
-        conjunction.end());
+                              [](const auto& clause) { return clause.empty(); }),
+            conjunction.end());
 
     if (conjunction.empty()) {
         return false;
