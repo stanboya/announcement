@@ -1,0 +1,128 @@
+%% LyX 2.3.0 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{float}
+\usepackage{algorithm}
+\usepackage{babel}
+
+\begin{document}
+
+\title{A new belief announcement solver}
+
+\author{Aaron Hunter, John Agapeyev}
+\maketitle
+\begin{abstract}
+We present a new tool for solving the problem of belief revision across
+multiple agents using a shared announcement formula. We model the
+problem as a deepest-node search inside a multitree, where the depth
+represents the number of agents satisfied by a given formula. We hope
+modeling the problem in this way will allow future improvements
+\end{abstract}
+
+\section{Introduction}
+
+Belief revision refers to the process where an agent incorporates
+new information to an existing set of beliefs. For the sake of efficiency,
+it may be desirable to perform belief revision in bulk across multiple
+agents to accomplish multiple goals. The key problem behind this idea
+of shared bulk revision is finding a suitable announcement. Belief
+Revision is already a known hard problem, so the goal is to minimize
+overhead in solving the problem across multiple agents. We present
+a new tool to solve this problem in an innovative and efficient way
+that lays the groundwork for future improvements that have been applied
+to similar problem modelling schemes.
+
+\section{Background}
+
+I don't understand the problem enough to write background on it.
+
+\section{Design}
+
+We model the problem of finding a suitable announcement for \emph{N}
+agents as exploring a multitree, where each node is a possible announcement
+formula, and its depth represents the number of agents whose goals
+are satisfied by the formula. In this way, the problem can be modeled
+as a deepest-node search inside the multitree, where we want to find
+the node farthest from the roots, as it would represent either a solution
+for all \emph{N }agents, or it would fail to reach the maxmium depth,
+indicating the problem has no solution. The idea behind modeling the
+problem in this fashion is to potentially benefit from algorithmic
+improvements in future work such as heuristics and backtracking that
+can be found in algorithms such as Conflict Driven Clause Learning
+and Alpha-Beta pruning.
+
+\begin{algorithm}[H]
+\caption{Belief Announcement}
+
+\textbf{function }FindAnnouncement($\beta,\gamma$)
+\begin{enumerate}
+\item \textbf{if }SAT($\{\gamma_{1}\cup\gamma_{2}\cup\ldots\gamma_{N}\}$)
+\textbf{then return }$\{\gamma_{1}\cup\gamma_{2}\cup\ldots\gamma_{N}\}$
+\item \textbf{while }$\phi=GetNextFormula()$ \textbf{do}
+\begin{enumerate}
+\item \textbf{For }\emph{i = }1 \textbf{up to} \emph{N}
+\begin{enumerate}
+\item $R=BeliefRevise(\beta_{i},\phi)$
+\item \textbf{if $R\cap\gamma_{i}=\emptyset$ then goto 2}
+\end{enumerate}
+\item \textbf{end for}
+\item \textbf{return $\phi$}
+\end{enumerate}
+\item \textbf{end while}
+\item \textbf{return }NO\_SOLUTION
+\end{enumerate}
+\end{algorithm}
+
+\noindent To find trivial solutions, we first check if all the agents
+goals are satisfiable using a SAT solver. If all goals are satisfiable
+together, then the solution is simply the concatenation of all the
+goals into a single formula. If the goals are unsatisfiable, then
+we enumerate the list of possible revision formulas. Each formula,
+we revise the first agent's beliefs, and see if its goal is satisfied
+by the result. If it is, repeat for the next agent. If the goal is
+not satisfied, then the formula is not a valid solution, so exit that
+iteration and get a new formula to test. If all agents are satisfied,
+that formula is the announcement solution. If no possible formula
+satisfies all agents, then the problem has no solution. \emph{GetNextFormula()
+}returns the next formula in an \emph{$O(2^{M})$} brute force where
+\emph{M} is the total number of variables in the set of agent beliefs
+and goals. Belief Revision is performed through an external tool known
+as GenC.
+
+\section{Implementation}
+
+\subsection{Input/Output}
+
+Due to the complexity of the input data, relying on file I/O is difficult
+from both an implementation and usage standpoint. To remedy this,
+all I/O is performed through a GUI, implemented using Qt. All inputs
+are human readable formula strings such as ``(1 and 2 or (3 and not
+4))''. Variables are represented as numbers , and the logical operations
+are limited to AND, OR, and NOT. This allows efficient representation
+and input of fairly complex formulae from a user standpoint. Output
+is displayed through pop-up message boxes displaying the relevant
+information, be it an error, or the solution to the problem.
+
+\subsection{Data Representation}
+
+Internally, all formulas are represented as 2D arrays of integers,
+where the integer is the variable number, and its sign represents
+logical negation. All manipulation and I/O is based around this construct,
+and is converted to and from other forms transparently by the application.
+For enumerating the list of possible revision formulas, this is performed
+as a brute force, where each bit is converted into a term for the
+revision formula in DNF. For example, the binary string 1011 would
+translate into ``1 and not 2 and 3 and 4''. This is how the \emph{GetNextFormula()}
+function is implemented in section 3.
+
+\section{Conclusion}
+
+We present a tool for efficiently solving the problem of determining
+shared belief announcement among multiple agents. We model the problem
+as a deepest-node search inside a multitree, where the depth of a
+node is the number of agents a given formula satisfies. Our hope is
+to lay the groundwork for future algorithmic improvements based on
+this initial problem model.
+\end{document}
