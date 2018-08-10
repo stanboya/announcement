@@ -65,27 +65,8 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
         if (conjunction.empty()) {
             conjunction = std::move(base_goal);
         }
-
         simplify_dnf(conjunction);
 
-#if 0
-        const auto revised_beliefs = convert_dnf_to_raw(conjunction);
-        for (const auto& first : revised_beliefs) {
-            for (const auto& second : revised_beliefs) {
-                if (first == second) {
-                    continue;
-                }
-                unsigned long count = 0;
-                for (unsigned long k = 0; k < first.size(); ++k) {
-                    count += first[k] ^ second[k];
-                }
-                if (count == 1) {
-                    std::cout << "Minimization is possible\n";
-                    return get_minimal_formula(revised_beliefs);
-                }
-            }
-        }
-#endif
         return print_formula_dnf(conjunction);
     }
 
