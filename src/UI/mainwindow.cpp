@@ -22,7 +22,7 @@ MainWindow::~MainWindow() {
 void MainWindow::on_add_entry_clicked() {
     bool ok;
     QString beliefs = QInputDialog::getText(this, tr("Initial Agent Beliefs"),
-            tr("Initial Beliefs:"), QLineEdit::Normal, QDir::home().dirName(), &ok);
+            tr("Initial Beliefs:"), QLineEdit::Normal, "", &ok);
 
     if (!ok || beliefs.isEmpty()) {
         QMessageBox::information(this, tr("Announcement Solver"), tr("Initial agent beliefs contained invalid token"));
@@ -30,7 +30,7 @@ void MainWindow::on_add_entry_clicked() {
     }
 
     QString goals = QInputDialog::getText(this, tr("Desired Agent Goal"), tr("Desired Goal:"),
-            QLineEdit::Normal, QDir::home().dirName(), &ok);
+            QLineEdit::Normal, "", &ok);
 
     if (!ok || goals.isEmpty()) {
         QMessageBox::information(this, tr("Announcement Solver"), tr("Agent goal contained invalid token"));
