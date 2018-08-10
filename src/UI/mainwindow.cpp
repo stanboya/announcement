@@ -126,6 +126,9 @@ void MainWindow::on_generate_test_clicked() {
                     //goal << (j + 1) << " and ";
                 }
             }
+            if (rand() % 2) {
+                goal << "not ";
+            }
             goal << (i + 1);
 
             std::string belief_string = belief.str();
