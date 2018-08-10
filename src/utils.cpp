@@ -23,6 +23,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <sstream>
 
 #include "utils.h"
 
@@ -63,31 +64,34 @@ std::vector<std::vector<int32_t>> convert_to_num(
     return output;
 }
 
-void print_formula_dnf(const std::vector<std::vector<int32_t>>& formula) noexcept {
+std::string print_formula_dnf(const std::vector<std::vector<int32_t>>& formula) noexcept {
+    std::stringstream ss;
     for (const auto& clause : formula) {
         for (const auto term : clause) {
-            std::cout << term << " ";
+            ss << term << " ";
         }
-        std::cout << "\n";
+        ss << "\n";
     }
 
     for (const auto& clause : formula) {
-        std::cout << '(';
+        ss << '(';
         for (const auto term : clause) {
             if (term < 0) {
-                std::cout << "not ";
+                ss << "not ";
             }
-            std::cout << std::abs(term);
+            ss << std::abs(term);
             if (term != clause.back()) {
-                std::cout << " and ";
+                ss << " and ";
             }
         }
-        std::cout << ')';
+        ss << ')';
         if (clause != formula.back()) {
-            std::cout << " or ";
+            ss << " or ";
         }
     }
-    std::cout << std::endl;
+    ss << std::endl;
+    std::cout << ss.str();
+    return ss.str();
 }
 
 //This applies the distributive property to convert between DNF and CNF DIMACS formats

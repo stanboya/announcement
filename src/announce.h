@@ -26,7 +26,7 @@ struct agent {
     std::vector<std::vector<int32_t>> goal;
 };
 
-void find_announcement(const std::vector<agent>& agents) noexcept;
+std::string find_announcement(const std::vector<agent>& agents) noexcept;
 
 //Goals must be vector of DNF formulas
 bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goals) noexcept;

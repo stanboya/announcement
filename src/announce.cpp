@@ -25,7 +25,7 @@
 #include "tools.h"
 #include "utils.h"
 
-void find_announcement(const std::vector<agent>& agents) noexcept {
+std::string find_announcement(const std::vector<agent>& agents) noexcept {
     std::vector<std::vector<std::vector<int32_t>>> goals;
 
     for (const auto& agent : agents) {
@@ -68,9 +68,7 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
 
         simplify_dnf(conjunction);
 
-        print_formula_dnf(conjunction);
-
-        return;
+        return print_formula_dnf(conjunction);
     }
 
     std::cout << "Goals are inconsistent, trying to find a solution\n";
@@ -122,18 +120,15 @@ void find_announcement(const std::vector<agent>& agents) noexcept {
                 //Revised beliefs does not include the goal
                 goto bad_result;
             }
-
-            print_formula_dnf(revised);
-            print_formula_dnf(agent.goal);
         }
         std::cout << "Found an announcement that works\n";
-        print_formula_dnf(revision_formula);
-        return;
+        return print_formula_dnf(revision_formula);
     bad_result:
         continue;
     }
 
     std::cout << "No possible satisfying assignment was found\n";
+    return "No possible satisfying assignment was found\n";
 }
 
 //Goals must be vector of DNF formulas
