@@ -257,14 +257,14 @@ void simplify_dnf(std::vector<std::vector<int32_t>>& formula) noexcept {
     }
     std::sort(formula.begin(), formula.end());
     formula.erase(std::unique(formula.begin(), formula.end()), formula.end());
-    formula.erase(std::remove_if(formula.begin(), formula.end(),
-                          [](const auto& clause) { return clause.empty(); }),
-            formula.end());
 
     //Remove subsets of existing clauses
     //This results in smaller end results, but doesn't really affect the initial state increase
     formula.erase(std::remove_if(formula.begin(), formula.end(),
                           [&](const auto& clause) {
+                              if (clause.empty()) {
+                                  return true;
+                              }
                               for (const auto& other : formula) {
                                   if (clause == other || other.empty()) {
                                       continue;
