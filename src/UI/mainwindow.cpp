@@ -25,6 +25,7 @@ void MainWindow::on_add_entry_clicked() {
             tr("Initial Beliefs:"), QLineEdit::Normal, QDir::home().dirName(), &ok);
 
     if (!ok || beliefs.isEmpty()) {
+        QMessageBox::information(this, tr("Announcement Solver"), tr("Initial agent beliefs contained invalid token"));
         return;
     }
 
@@ -32,6 +33,7 @@ void MainWindow::on_add_entry_clicked() {
             QLineEdit::Normal, QDir::home().dirName(), &ok);
 
     if (!ok || goals.isEmpty()) {
+        QMessageBox::information(this, tr("Announcement Solver"), tr("Agent goal contained invalid token"));
         return;
     }
 
@@ -44,6 +46,7 @@ void MainWindow::on_add_entry_clicked() {
             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
 
     if (belief_tokens.empty() || goal_tokens.empty()) {
+        QMessageBox::information(this, tr("Announcement Solver"), tr("Agent beliefs and/or goal was malformed"));
         return;
     }
 
