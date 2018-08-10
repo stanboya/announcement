@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <string>
 
 std::vector<std::vector<bool>> convert_to_bool(const std::vector<std::vector<int32_t>>& state) noexcept;
 std::vector<std::vector<int32_t>> convert_to_num(const std::vector<std::vector<bool>>& state) noexcept;
@@ -35,5 +36,9 @@ std::vector<std::vector<int32_t>> convert_raw(const std::vector<std::vector<bool
 std::vector<std::vector<bool>> convert_dnf_to_raw(const std::vector<std::vector<int32_t>>& clause_list) noexcept;
 
 void simplify_dnf(std::vector<std::vector<int32_t>>& formula) noexcept;
+
+std::vector<std::vector<int32_t>> minimize_output(const std::vector<std::vector<int32_t>>& original_terms) noexcept;
+
+std::string get_minimal_formula(const std::vector<std::vector<bool>>& revised_beliefs) noexcept;
 
 #endif

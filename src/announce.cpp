@@ -68,6 +68,24 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
 
         simplify_dnf(conjunction);
 
+#if 0
+        const auto revised_beliefs = convert_dnf_to_raw(conjunction);
+        for (const auto& first : revised_beliefs) {
+            for (const auto& second : revised_beliefs) {
+                if (first == second) {
+                    continue;
+                }
+                unsigned long count = 0;
+                for (unsigned long k = 0; k < first.size(); ++k) {
+                    count += first[k] ^ second[k];
+                }
+                if (count == 1) {
+                    std::cout << "Minimization is possible\n";
+                    return get_minimal_formula(revised_beliefs);
+                }
+            }
+        }
+#endif
         return print_formula_dnf(conjunction);
     }
 
@@ -76,6 +94,7 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
     const auto max_var = get_variable_count(agents);
     assert(max_var <= 64);
     for (uint64_t i = 0; i < (1ul << (max_var - 1)); ++i) {
+restart:
         std::vector<int32_t> test_case;
         for (auto j = 0; j < max_var; ++j) {
             const auto val = (1 << j) & i;
@@ -118,13 +137,28 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
             //revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
             if (intersection.empty()) {
                 //Revised beliefs does not include the goal
-                goto bad_result;
+                ++i;
+                goto restart;
             }
         }
         std::cout << "Found an announcement that works\n";
+        const auto revised_beliefs = convert_dnf_to_raw(revision_formula);
+        for (const auto& first : revised_beliefs) {
+            for (const auto& second : revised_beliefs) {
+                if (first == second) {
+                    continue;
+                }
+                unsigned long count = 0;
+                for (unsigned long k = 0; k < first.size(); ++k) {
+                    count += first[k] ^ second[k];
+                }
+                if (count == 1) {
+                    std::cout << "Minimization is possible\n";
+                    return get_minimal_formula(revised_beliefs);
+                }
+            }
+        }
         return print_formula_dnf(revision_formula);
-    bad_result:
-        continue;
     }
 
     std::cout << "No possible satisfying assignment was found\n";
@@ -159,6 +193,8 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
 
     conjunction = convert_normal_forms(conjunction);
 
+    simplify_dnf(conjunction);
+
     if (conjunction.empty()) {
         return false;
     }
@@ -185,3 +221,4 @@ int32_t get_variable_count(const std::vector<agent>& agents) noexcept {
     }
     return max_variable_count;
 }
+

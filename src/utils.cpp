@@ -20,10 +20,10 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
+#include <sstream>
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <sstream>
 
 #include "utils.h"
 
@@ -115,6 +115,8 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
             }
         }
 
+        simplify_dnf(result);
+
         return result;
     } else {
         //Get the result excluding the first clause
@@ -128,6 +130,7 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
                 result.emplace_back(std::move(extended_result));
             }
         }
+#if 0
         for (auto& clause : result) {
             //Sort the result in variable order
             std::sort(clause.begin(), clause.end(),
@@ -139,6 +142,9 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
                              [](const auto& clause) { return clause.empty(); }),
                 result.end());
         result.shrink_to_fit();
+#endif
+
+        simplify_dnf(result);
 
         std::cout << "Step finished\n";
         std::cout << "New size " << result.size() << "\n";
@@ -254,4 +260,148 @@ void simplify_dnf(std::vector<std::vector<int32_t>>& formula) noexcept {
     formula.erase(std::remove_if(formula.begin(), formula.end(),
                           [](const auto& clause) { return clause.empty(); }),
             formula.end());
+
+    //Remove subsets of existing clauses
+    //This results in smaller end results, but doesn't really affect the initial state increase
+    formula.erase(std::remove_if(formula.begin(), formula.end(),
+                          [&](const auto& clause) {
+                              for (const auto& other : formula) {
+                                  if (clause == other || other.empty()) {
+                                      continue;
+                                  }
+                                  if (std::includes(other.cbegin(), other.cend(), clause.cbegin(),
+                                              clause.cend())) {
+                                      return true;
+                                  }
+                              }
+                              return false;
+                          }),
+            formula.end());
+}
+
+std::vector<std::vector<int32_t>> minimize_output(
+        const std::vector<std::vector<int32_t>>& original_terms) noexcept {
+    std::vector<std::vector<int32_t>> output;
+    output.reserve(original_terms.size());
+
+    std::vector<int32_t> converted_term;
+    converted_term.reserve(original_terms.front().size());
+
+    //for (const auto& first : original_terms) {
+#pragma omp parallel for schedule(static) shared(output) firstprivate(converted_term)
+    for (auto it = original_terms.cbegin(); it < original_terms.cend(); ++it) {
+        const auto& first = *it;
+        bool term_minimized = false;
+        for (const auto& second : original_terms) {
+            if (first == second) {
+                continue;
+            }
+            unsigned long count = 0;
+            unsigned long index = -1;
+            for (unsigned long i = 0; i < std::min(first.size(), second.size()); ++i) {
+                if ((first[i] * -1) == second[i]) {
+                    ++count;
+                    index = i;
+                }
+            }
+            if (count != 1) {
+                continue;
+            }
+            //Count is 1, minimize
+            for (unsigned long i = 0; i < first.size(); ++i) {
+                if (i == index) {
+                    continue;
+                }
+                converted_term.emplace_back(first[i]);
+            }
+#pragma omp critical
+            output.emplace_back(converted_term);
+            converted_term.clear();
+            term_minimized = true;
+        }
+        if (!term_minimized) {
+            for (unsigned long i = 0; i < first.size(); ++i) {
+                converted_term.emplace_back(first[i]);
+            }
+        }
+#pragma omp critical
+        output.emplace_back(converted_term);
+        converted_term.clear();
+    }
+
+    for (auto& clause : output) {
+        std::sort(clause.begin(), clause.end());
+    }
+
+    std::sort(output.begin(), output.end());
+    output.erase(std::unique(output.begin(), output.end()), output.end());
+    output.erase(std::remove_if(output.begin(), output.end(),
+                         [](const auto& clause) { return clause.empty(); }),
+            output.end());
+
+    //Remove subsets of existing clauses
+    //This results in smaller end results, but doesn't really affect the initial state increase
+    output.erase(std::remove_if(output.begin(), output.end(),
+                         [&](const auto& clause) {
+                             for (const auto& other : output) {
+                                 if (clause == other || other.empty()) {
+                                     continue;
+                                 }
+                                 if (std::includes(other.cbegin(), other.cend(), clause.cbegin(),
+                                             clause.cend())) {
+                                     return true;
+                                 }
+                             }
+                             return false;
+                         }),
+            output.end());
+
+    const auto abs_cmp
+            = [](const auto& lhs, const auto& rhs) { return std::abs(lhs) < std::abs(rhs); };
+    for (auto& clause : output) {
+        std::sort(clause.begin(), clause.end(), abs_cmp);
+    }
+
+    return output;
+}
+
+std::string get_minimal_formula(const std::vector<std::vector<bool>>& revised_beliefs) noexcept {
+    std::cout << "Initial pre-minimized state size: " << revised_beliefs.size() << "\n";
+
+    auto minimized = minimize_output(convert_to_num(revised_beliefs));
+    for (;;) {
+        unsigned long old_size = minimized.size();
+
+        std::cout << "Minimized Size: " << old_size << "\n";
+        unsigned long long old_sum = 0;
+        for (const auto& clause : minimized) {
+            old_sum += clause.size();
+        }
+        std::cout << "Average clause size: " << (old_sum / old_size) << "\n";
+
+        std::cout << "Minimized states:\n";
+        for (const auto& belief : minimized) {
+            for (const auto term : belief) {
+                std::cout << term << " ";
+            }
+            std::cout << "\n";
+        }
+
+        minimized = minimize_output(minimized);
+
+        unsigned long long new_sum = 0;
+        for (const auto& clause : minimized) {
+            new_sum += clause.size();
+        }
+
+        if (old_size == minimized.size() && new_sum == old_sum) {
+            minimized = minimize_output(minimized);
+            //Print minimized
+            return print_formula_dnf(minimized);
+        }
+        for (auto& clause : minimized) {
+            clause.shrink_to_fit();
+        }
+        minimized.shrink_to_fit();
+    }
 }

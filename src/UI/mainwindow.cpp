@@ -105,6 +105,7 @@ void MainWindow::on_generate_test_clicked() {
     for (int i = 0; i < ui->data_table->rowCount(); ++i) {
         ui->data_table->removeRow(i);
         agent_list.clear();
+        --i;
     }
 
     if (reply == QMessageBox::Yes) {
