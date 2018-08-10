@@ -6,11 +6,9 @@
 #include <sstream>
 #include <vector>
 
-#include "add_entry_dialog.h"
 #include "announce.h"
 #include "interactive.h"
 #include "mainwindow.h"
-#include "ui_add_entry_dialog.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {

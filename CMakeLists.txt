@@ -34,9 +34,6 @@ set(ANNOUNCE_SRCS
     src/announce.h
     src/interactive.cpp
     src/interactive.h
-    src/UI/add_entry_dialog.cpp
-    src/UI/add_entry_dialog.h
-    src/UI/add_entry_dialog.ui
     src/UI/mainwindow.h
     src/UI/mainwindow.cpp
     src/UI/mainwindow.ui
