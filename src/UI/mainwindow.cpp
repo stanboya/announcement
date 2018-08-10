@@ -60,13 +60,12 @@ void MainWindow::on_add_entry_clicked() {
 
 void MainWindow::on_remove_entry_clicked() {
     for (int i = 0; i < ui->data_table->rowCount(); ++i) {
-        for (int j = 0; j < ui->data_table->columnCount(); ++j) {
-            QTableWidgetItem *item = ui->data_table->item(i, j);
-            if (item && item->checkState() == Qt::Checked) {
-                ui->data_table->removeRow(i);
-
-                agent_list.erase(agent_list.begin() + i);
-            }
+        QTableWidgetItem *item = ui->data_table->item(i, 0);
+        if (item && item->checkState() == Qt::Checked) {
+            ui->data_table->removeRow(i);
+            agent_list.erase(agent_list.begin() + i);
+            //Fix weird issue with column staying put
+            --i;
         }
     }
     for (int i = 0; i < ui->data_table->rowCount(); ++i) {
