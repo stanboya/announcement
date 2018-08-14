@@ -75,7 +75,6 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
     const auto max_var = get_variable_count(agents);
     assert(max_var <= 64);
     for (uint64_t i = 0; i < (1ul << (max_var - 1)); ++i) {
-restart:
         std::vector<int32_t> test_case;
         for (auto j = 0; j < max_var; ++j) {
             const auto val = (1 << j) & i;
@@ -89,6 +88,8 @@ restart:
         //Need to do belief revision on this and compare with goals
         std::vector<std::vector<int32_t>> revision_formula;
         revision_formula.emplace_back(std::move(test_case));
+
+        bool bad_solution = false;
 
         for (const auto& agent : agents) {
             auto revised = belief_revise(agent.beliefs, revision_formula);
@@ -118,9 +119,12 @@ restart:
             //revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
             if (intersection.empty()) {
                 //Revised beliefs does not include the goal
-                ++i;
-                goto restart;
+                bad_solution = true;
+                break;
             }
+        }
+        if (bad_solution) {
+            continue;
         }
         std::cout << "Found an announcement that works\n";
         const auto revised_beliefs = convert_dnf_to_raw(revision_formula);

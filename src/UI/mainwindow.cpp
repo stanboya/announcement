@@ -160,6 +160,54 @@ void MainWindow::on_generate_test_clicked() {
             ui->data_table->setItem(ui->data_table->rowCount() - 1, 3, new QTableWidgetItem(QString::fromStdString(goal_string)));
         }
     } else {
-        //qDebug() << "Yes was *not* clicked";
+        for (int i = 0; i < agent_count; ++i) {
+            std::stringstream belief;
+            std::stringstream goal;
+            for (int j = 0; j < agent_count; ++j) {
+                if (rand() % 2) {
+                    belief << "not ";
+                }
+                if (i != j) {
+                    goal << "not ";
+                }
+                if (j + 1 == agent_count) {
+                    belief << (j + 1);
+                    goal << (j + 1);
+                } else {
+#if 0
+                    if (rand() % 2) {
+                        belief << (j + 1) << " or ";
+                    } else {
+                        belief << (j + 1) << " and ";
+                    }
+#endif
+                    belief << (j + 1) << " and ";
+                    goal << (j + 1) << " and ";
+                }
+            }
+
+            std::string belief_string = belief.str();
+            std::string goal_string = goal.str();
+
+            std::stringstream ss{shunting_yard(belief_string)};
+            std::vector<std::string> belief_tokens{
+                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+            ss = std::stringstream{shunting_yard(goal_string)};
+            std::vector<std::string> goal_tokens{
+                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+            agent_list.emplace_back(create_agent(belief_tokens, goal_tokens));
+
+            ui->data_table->insertRow(ui->data_table->rowCount());
+            QTableWidgetItem* item = new QTableWidgetItem();
+            item->setCheckState(Qt::Unchecked);
+            ui->data_table->setItem(ui->data_table->rowCount() - 1, 0, item);
+            ui->data_table->setItem(ui->data_table->rowCount() - 1, 1,
+                    new QTableWidgetItem(QString::number(ui->data_table->rowCount())));
+            ui->data_table->setItem(
+                    ui->data_table->rowCount() - 1, 2, new QTableWidgetItem(QString::fromStdString(belief_string)));
+            ui->data_table->setItem(ui->data_table->rowCount() - 1, 3, new QTableWidgetItem(QString::fromStdString(goal_string)));
+        }
     }
 }
