@@ -114,7 +114,7 @@ void MainWindow::on_generate_test_clicked() {
             std::stringstream goal;
             for (int j = 0; j < agent_count; ++j) {
                 if (rand() % 2) {
-                    //belief << "not ";
+                    belief << "not ";
                 }
                 if (i != j) {
                     //goal << "not ";
@@ -123,7 +123,11 @@ void MainWindow::on_generate_test_clicked() {
                     belief << (j + 1);
                     //goal << (j + 1);
                 } else {
-                    belief << (j + 1) << " or ";
+                    if (rand() % 2) {
+                        belief << (j + 1) << " or ";
+                    } else {
+                        belief << (j + 1) << " and ";
+                    }
                     //goal << (j + 1) << " and ";
                 }
             }
