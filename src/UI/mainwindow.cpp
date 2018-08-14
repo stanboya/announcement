@@ -166,9 +166,10 @@ void MainWindow::on_generate_test_clicked() {
             for (int j = 0; j < agent_count; ++j) {
                 if (rand() % 2) {
                     belief << "not ";
+                    goal << "not ";
                 }
                 if (i != j) {
-                    goal << "not ";
+                    //goal << "not ";
                 }
                 if (j + 1 == agent_count) {
                     belief << (j + 1);
@@ -181,7 +182,7 @@ void MainWindow::on_generate_test_clicked() {
                         belief << (j + 1) << " and ";
                     }
 #endif
-                    belief << (j + 1) << " and ";
+                    belief << (j + 1) << " or ";
                     goal << (j + 1) << " and ";
                 }
             }
