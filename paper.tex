@@ -4,8 +4,8 @@
 \usepackage[T1]{fontenc}
 \usepackage[latin9]{inputenc}
 \usepackage{float}
-\usepackage{algorithm}
 \usepackage{babel}
+\usepackage{algorithm}
 
 \begin{document}
 
@@ -18,7 +18,8 @@ We present a new tool for solving the problem of belief revision across
 multiple agents using a shared announcement formula. We model the
 problem as a deepest-node search inside a multitree, where the depth
 represents the number of agents satisfied by a given formula. We hope
-modeling the problem in this way will allow future improvements
+modeling the problem in this way will allow future improvements to
+be made.
 \end{abstract}
 
 \section{Introduction}
@@ -115,7 +116,7 @@ For enumerating the list of possible revision formulas, this is performed
 as a brute force, where each bit is converted into a term for the
 revision formula in DNF. For example, the binary string 1011 would
 translate into ``1 and not 2 and 3 and 4''. This is how the \emph{GetNextFormula()}
-function is implemented in section 3.
+function is implemented in section 3. 
 
 \section{Conclusion}
 
@@ -124,5 +125,5 @@ shared belief announcement among multiple agents. We model the problem
 as a deepest-node search inside a multitree, where the depth of a
 node is the number of agents a given formula satisfies. Our hope is
 to lay the groundwork for future algorithmic improvements based on
-this initial problem model.
+this initial problem model. 
 \end{document}
