@@ -42,6 +42,9 @@ set(ANNOUNCE_SRCS
 add_custom_target(glucose COMMAND make r
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/sat/parallel
 )
+add_custom_target(glucose_simp COMMAND make r
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/sat/simp
+)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/belief_revise)
 
@@ -65,7 +68,7 @@ target_include_directories(announce PRIVATE
     src/UI
 )
 
-add_dependencies(announce glucose)
+add_dependencies(announce glucose glucose_simp)
 
 target_link_libraries(announce Qt5::Widgets)
 
