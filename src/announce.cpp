@@ -115,8 +115,7 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
             std::set_intersection(revised.begin(), revised.end(), agent.goal.begin(),
                     agent.goal.end(), std::back_inserter(intersection));
 
-            //if (!std::includes(
-            //revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
+            //if (!std::includes(revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
             if (intersection.empty()) {
                 //Revised beliefs does not include the goal
                 bad_solution = true;
