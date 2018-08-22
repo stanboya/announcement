@@ -179,7 +179,7 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
 
     conjunction = convert_normal_forms(conjunction);
 
-    simplify_dnf(conjunction);
+    //simplify_dnf(conjunction);
 
     if (conjunction.empty()) {
         return false;

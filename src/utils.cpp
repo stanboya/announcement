@@ -115,7 +115,7 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
             }
         }
 
-        simplify_dnf(result);
+        //simplify_dnf(result);
 
         return result;
     } else {
@@ -130,7 +130,7 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
                 result.emplace_back(std::move(extended_result));
             }
         }
-#if 0
+#if 1
         for (auto& clause : result) {
             //Sort the result in variable order
             std::sort(clause.begin(), clause.end(),
@@ -144,7 +144,7 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
         result.shrink_to_fit();
 #endif
 
-        simplify_dnf(result);
+        //simplify_dnf(result);
 
         std::cout << "Step finished\n";
         std::cout << "New size " << result.size() << "\n";
