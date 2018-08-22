@@ -85,3 +85,4 @@ announce_autogen/
 # Working output files
 .tmp.input
 .tmp.output
+.tmp.2
