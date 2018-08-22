@@ -33,23 +33,25 @@
 #include "tools.h"
 
 static struct option long_options[]
-    = {{"verbose", no_argument, 0, 'v'}, {"output", required_argument, 0, 'o'}, {0, 0, 0, 0}};
+        = {{"verbose", no_argument, 0, 'v'}, {"output", required_argument, 0, 'o'}, {0, 0, 0, 0}};
 
 #define print_help() \
     do { \
         printf("usage options:\n" \
                "\t [v]erbose               - Output in verbose mode\n" \
-               "\t [o]utput                - File to output revised beliefse to\n" \
+               "\t [o]utput                - File to output belief announcement to\n" \
+               "\t [t]est                  - Run worst case scenario test and exit\n" \
                "\t [h]elp                  - this message\n"); \
     } while (0)
 
-int main(int argc, char **argv) {
-    const char *output_file = nullptr;
+int main(int argc, char** argv) {
+    const char* output_file = nullptr;
     verbose = false;
+    int agent_count = 0;
     for (;;) {
         int c;
         int option_index = 0;
-        if ((c = getopt_long(argc, argv, "hvo:", long_options, &option_index)) == -1) {
+        if ((c = getopt_long(argc, argv, "hvo:t:", long_options, &option_index)) == -1) {
             break;
         }
         switch (c) {
@@ -59,6 +61,12 @@ int main(int argc, char **argv) {
             case 'o':
                 output_file = optarg;
                 break;
+            case 't':
+                agent_count = strtol(optarg, NULL, 10);
+                if (agent_count > 64 || agent_count <= 1) {
+                    agent_count = 0;
+                }
+                break;
             case 'h':
                 [[fallthrough]];
             case '?':
@@ -67,6 +75,34 @@ int main(int argc, char **argv) {
                 print_help();
                 return EXIT_SUCCESS;
         }
+    }
+    if (agent_count > 1) {
+        std::vector<agent> agent_list;
+        for (int i = 0; i < agent_count; ++i) {
+            std::stringstream belief;
+            std::stringstream goal;
+
+            belief << (i + 1);
+            if (i & 1) {
+                goal << "not ";
+            }
+            goal << 1;
+
+            std::string belief_string = belief.str();
+            std::string goal_string = goal.str();
+
+            std::stringstream ss{shunting_yard(belief_string)};
+            std::vector<std::string> belief_tokens{
+                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+            ss = std::stringstream{shunting_yard(goal_string)};
+            std::vector<std::string> goal_tokens{
+                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+            agent_list.emplace_back(create_agent(belief_tokens, goal_tokens));
+        }
+        find_announcement(agent_list);
+        return EXIT_SUCCESS;
     }
 
     QApplication app(argc, argv);
