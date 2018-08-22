@@ -37,6 +37,7 @@ set(ANNOUNCE_SRCS
     src/UI/mainwindow.h
     src/UI/mainwindow.cpp
     src/UI/mainwindow.ui
+    belief_revise/src/belief.cpp
 )
 
 add_custom_target(glucose COMMAND make r
@@ -66,6 +67,7 @@ target_compile_options(announce PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_OPTIONS}>
 target_include_directories(announce PRIVATE
     src
     src/UI
+    belief_revise/src
 )
 
 add_dependencies(announce glucose glucose_simp)

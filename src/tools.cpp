@@ -17,6 +17,7 @@
 #include <vector>
 #include <cstdint>
 #include <iostream>
+#include <cassert>
 #include <fstream>
 #include <algorithm>
 #include <cmath>
@@ -26,6 +27,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "tools.h"
+#include "utils.h"
+#include "belief.h"
 
 bool sat(const std::vector<std::vector<int32_t>>& clause_list) noexcept {
     const char *input_filename = ".tmp.input";
@@ -147,6 +150,25 @@ std::vector<std::vector<int32_t>> allsat(const std::vector<std::vector<int32_t>>
 }
 
 std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<int32_t>>& beliefs, const std::vector<std::vector<int32_t>>& revision_formula) noexcept {
+#if 1
+    //Formula must be CNF
+    //Beliefs must be bit vectors
+
+    auto bel = convert_dnf_to_raw(beliefs);
+
+    assert(revision_formula.size() == 1);
+
+    //This is just needed to convert dnf formula into cnf input for belief revision
+    std::vector<std::vector<int32_t>> converted_form;
+    for (const auto clause : revision_formula.front()) {
+        std::vector<int32_t> cnf_clause;
+        cnf_clause.emplace_back(clause);
+        converted_form.emplace_back(std::move(cnf_clause));
+    }
+
+    return revise_beliefs(bel, converted_form, {}, nullptr);
+
+#else
     const char *input_filename = ".tmp.input";
     const char *output_filename = ".tmp.output";
 
@@ -215,5 +237,6 @@ std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<in
     }
 
     return output_states;
+#endif
 }
 

@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
             std::stringstream belief;
             std::stringstream goal;
 
-            belief << (i + 1);
+            belief << agent_count;
             if (i & 1) {
                 goal << "not ";
             }

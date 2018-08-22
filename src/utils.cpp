@@ -105,7 +105,7 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
 
     std::cout << "Conversion called with size " << normal_clauses.size() << "\n";
 
-    assert(normal_clauses.size() >= 2);
+    assert(normal_clauses.size() != 1);
 
     if (normal_clauses.size() == 2) {
         //Handle final case
@@ -279,7 +279,7 @@ void simplify_dnf(std::vector<std::vector<int32_t>>& formula) noexcept {
             formula.end());
 }
 
-std::vector<std::vector<int32_t>> minimize_output(
+std::vector<std::vector<int32_t>> minimize_formula_output(
         const std::vector<std::vector<int32_t>>& original_terms) noexcept {
     std::vector<std::vector<int32_t>> output;
     output.reserve(original_terms.size());
@@ -368,7 +368,7 @@ std::vector<std::vector<int32_t>> minimize_output(
 std::string get_minimal_formula(const std::vector<std::vector<bool>>& revised_beliefs) noexcept {
     std::cout << "Initial pre-minimized state size: " << revised_beliefs.size() << "\n";
 
-    auto minimized = minimize_output(convert_to_num(revised_beliefs));
+    auto minimized = minimize_formula_output(convert_to_num(revised_beliefs));
     for (;;) {
         unsigned long old_size = minimized.size();
 
@@ -387,7 +387,7 @@ std::string get_minimal_formula(const std::vector<std::vector<bool>>& revised_be
             std::cout << "\n";
         }
 
-        minimized = minimize_output(minimized);
+        minimized = minimize_formula_output(minimized);
 
         unsigned long long new_sum = 0;
         for (const auto& clause : minimized) {
@@ -395,7 +395,7 @@ std::string get_minimal_formula(const std::vector<std::vector<bool>>& revised_be
         }
 
         if (old_size == minimized.size() && new_sum == old_sum) {
-            minimized = minimize_output(minimized);
+            minimized = minimize_formula_output(minimized);
             //Print minimized
             return print_formula_dnf(minimized);
         }
