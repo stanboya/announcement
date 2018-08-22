@@ -74,7 +74,7 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
 
     const auto max_var = get_variable_count(agents);
     assert(max_var <= 64);
-    for (uint64_t i = 0; i < (1ul << (max_var - 1)); ++i) {
+    for (uint64_t i = 0; i < (1ul << (max_var)); ++i) {
         std::vector<int32_t> test_case;
         for (auto j = 0; j < max_var; ++j) {
             const auto val = (1 << j) & i;
@@ -100,25 +100,27 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
             }
             std::sort(revised.begin(), revised.end());
 
-            /*
-             * Since belief revision and the goals are both DNF, goal contains a set of possible outcomes
-             * So rather than checking logical equivalence if all outcomes are represented, I should check
-             * to see if the revised belief in the set of goal outcomes, which would accomplish the goal.
-             *
-             * So if the goal says 1 is true and 2 is either true or false, then it doesn't matter that the
-             * revision only return 1 and not 2, since that is one possible state of the goal due to being DNF.
-             * So it's equivalent, and thus, a valid solution.
-             */
+#if 1
+            std::cout << "Agent beliefs: \n";
+            print_formula_dnf(agent.beliefs);
 
-            std::vector<std::vector<int32_t>> intersection;
+            std::cout << "Revision formula: \n";
+            print_formula_dnf(revision_formula);
 
-            std::set_intersection(revised.begin(), revised.end(), agent.goal.begin(),
-                    agent.goal.end(), std::back_inserter(intersection));
+            std::cout << "Revised output: \n";
+            print_formula_dnf(revised);
 
-            //if (!std::includes(revised.begin(), revised.end(), agent.goal.begin(), agent.goal.end())) {
-            if (intersection.empty()) {
-                //Revised beliefs does not include the goal
-                bad_solution = true;
+            std::cout << "Agent goal: \n";
+            print_formula_dnf(agent.goal);
+#endif
+
+            for (const auto& clause : agent.goal) {
+                if (std::find(revised.cbegin(), revised.cend(), clause) == revised.cend()) {
+                    bad_solution = true;
+                    break;
+                }
+            }
+            if (bad_solution) {
                 break;
             }
         }
