@@ -78,6 +78,7 @@ int main(int argc, char** argv) {
     }
     if (agent_count > 1) {
         std::vector<agent> agent_list;
+        const auto agent_belief = get_dnf_from_equation({std::to_string(agent_count)});
         for (int i = 0; i < agent_count; ++i) {
             std::stringstream belief;
             std::stringstream goal;
@@ -99,7 +100,7 @@ int main(int argc, char** argv) {
             std::vector<std::string> goal_tokens{
                     std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
 
-            agent_list.emplace_back(create_agent(belief_tokens, goal_tokens));
+            agent_list.push_back({agent_belief, get_dnf_from_equation(goal_tokens)});
         }
         find_announcement(agent_list);
         return EXIT_SUCCESS;
