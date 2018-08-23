@@ -150,7 +150,7 @@ std::vector<std::vector<int32_t>> allsat(const std::vector<std::vector<int32_t>>
 }
 
 std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<int32_t>>& beliefs, const std::vector<std::vector<int32_t>>& revision_formula) noexcept {
-#if 0
+#if 1
     //Formula must be CNF
     //Beliefs must be bit vectors
 
