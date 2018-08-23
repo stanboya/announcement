@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "announce.h"
+#include "interactive.h"
 #include "tools.h"
 #include "utils.h"
 
@@ -100,20 +101,20 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
             }
             std::sort(revised.begin(), revised.end());
 
-            std::cout << "\n";
-#if 1
-            std::cout << "Agent beliefs: \n";
-            print_formula_dnf(agent.beliefs);
+            if (verbose) {
+                std::cout << "\n";
+                std::cout << "Agent beliefs: \n";
+                print_formula_dnf(agent.beliefs);
 
-            std::cout << "Revision formula: \n";
-            print_formula_dnf(revision_formula);
+                std::cout << "Revision formula: \n";
+                print_formula_dnf(revision_formula);
 
-            std::cout << "Revised output: \n";
-            print_formula_dnf(revised);
+                std::cout << "Revised output: \n";
+                print_formula_dnf(revised);
 
-            std::cout << "Agent goal: \n";
-            print_formula_dnf(agent.goal);
-#endif
+                std::cout << "Agent goal: \n";
+                print_formula_dnf(agent.goal);
+            }
 
             for (const auto& clause : agent.goal) {
                 if (std::find(revised.cbegin(), revised.cend(), clause) == revised.cend()) {
