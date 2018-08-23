@@ -100,7 +100,8 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
             }
             std::sort(revised.begin(), revised.end());
 
-#if 0
+            std::cout << "\n";
+#if 1
             std::cout << "Agent beliefs: \n";
             print_formula_dnf(agent.beliefs);
 
