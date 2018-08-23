@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "utils.h"
+#include "interactive.h"
 
 std::vector<std::vector<bool>> convert_to_bool(
         const std::vector<std::vector<int32_t>>& state) noexcept {
@@ -103,7 +104,9 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
         return normal_clauses;
     }
 
-    std::cout << "Conversion called with size " << normal_clauses.size() << "\n";
+    if (verbose) {
+        std::cout << "Conversion called with size " << normal_clauses.size() << "\n";
+    }
 
     assert(normal_clauses.size() != 1);
 
@@ -141,13 +144,15 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
         result.erase(std::remove_if(result.begin(), result.end(),
                              [](const auto& clause) { return clause.empty(); }),
                 result.end());
-        result.shrink_to_fit();
+        //result.shrink_to_fit();
 #endif
 
         //simplify_dnf(result);
 
-        std::cout << "Step finished\n";
-        std::cout << "New size " << result.size() << "\n";
+        if (verbose) {
+            std::cout << "Step finished\n";
+            std::cout << "New size " << result.size() << "\n";
+        }
         return result;
     }
 }
