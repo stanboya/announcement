@@ -198,7 +198,18 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
 
     simplify_dnf(conjunction);
 
-    conjunction = convert_normal_forms(conjunction);
+    if (conjunction.size() == 1) {
+        //Convert single clause DNF to CNF
+        std::vector<std::vector<int32_t>> converted_form;
+        for (const auto clause : conjunction.front()) {
+            std::vector<int32_t> cnf_clause;
+            cnf_clause.emplace_back(clause);
+            converted_form.emplace_back(std::move(cnf_clause));
+        }
+        conjunction = converted_form;
+    } else {
+        conjunction = convert_normal_forms(conjunction);
+    }
 
     //simplify_dnf(conjunction);
 

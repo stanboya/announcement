@@ -77,6 +77,7 @@ int main(int argc, char** argv) {
         }
     }
     if (agent_count > 1) {
+#if 0
         std::vector<agent> agent_list;
         std::stringstream belief;
         for (int i = 0; i < agent_count; ++i) {
@@ -106,6 +107,55 @@ int main(int argc, char** argv) {
             agent_list.push_back({agent_belief, get_dnf_from_equation(goal_tokens)});
         }
         find_announcement(agent_list);
+#else
+        std::vector<std::string> input_states;
+        input_states.emplace_back("1 and 2");
+        input_states.emplace_back("1 or 2");
+        input_states.emplace_back("1 and not 2");
+        input_states.emplace_back("1 or not 2");
+        input_states.emplace_back("not 1 and 2");
+        input_states.emplace_back("not 1 or 2");
+        input_states.emplace_back("not 1 and not 2");
+        input_states.emplace_back("not 1 or not 2");
+
+        std::vector<std::vector<agent>> brute_input;
+
+        for (int i = 0; i < 4096; ++i) {
+            const auto idx1 = i % 8;
+            const auto idx2 = (i / 8) % 8;
+            const auto idx3 = (i / 64) % 8;
+            const auto idx4 = (i / 64) / 8;
+
+            std::vector<agent> agent_list;
+
+            std::stringstream ss{shunting_yard(input_states[idx1])};
+            std::vector<std::string> belief_tokens{
+                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+            ss = std::stringstream{shunting_yard(input_states[idx2])};
+            std::vector<std::string> goal_tokens{
+                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+            agent_list.emplace_back(create_agent(belief_tokens, goal_tokens));
+
+            ss = std::stringstream{shunting_yard(input_states[idx3])};
+            belief_tokens = std::vector<std::string>{
+                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+            ss = std::stringstream{shunting_yard(input_states[idx4])};
+            goal_tokens = std::vector<std::string>{
+                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+            agent_list.emplace_back(create_agent(belief_tokens, goal_tokens));
+
+            brute_input.emplace_back(std::move(agent_list));
+        }
+
+        for (const auto& input : brute_input) {
+            find_announcement(input);
+        }
+
+#endif
         return EXIT_SUCCESS;
     }
 
