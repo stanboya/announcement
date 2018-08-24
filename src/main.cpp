@@ -78,23 +78,26 @@ int main(int argc, char** argv) {
     }
     if (agent_count > 1) {
         std::vector<agent> agent_list;
-        const auto agent_belief = get_dnf_from_equation({std::to_string(agent_count)});
+        std::stringstream belief;
         for (int i = 0; i < agent_count; ++i) {
-            std::stringstream belief;
+            belief << (i + 1);
+            if (i < (agent_count - 1)) {
+                belief << " and ";
+            }
+        }
+        std::stringstream ss{shunting_yard(belief.str())};
+        std::vector<std::string> belief_tokens{
+                std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+        const auto agent_belief = get_dnf_from_equation(belief_tokens);
+        for (int i = 0; i < agent_count; ++i) {
             std::stringstream goal;
 
-            belief << agent_count;
             if (i & 1) {
                 goal << "not ";
             }
             goal << 1;
 
-            std::string belief_string = belief.str();
             std::string goal_string = goal.str();
-
-            std::stringstream ss{shunting_yard(belief_string)};
-            std::vector<std::string> belief_tokens{
-                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
 
             ss = std::stringstream{shunting_yard(goal_string)};
             std::vector<std::string> goal_tokens{

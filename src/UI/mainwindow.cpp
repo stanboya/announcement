@@ -155,9 +155,10 @@ void MainWindow::on_generate_test_clicked() {
             ui->data_table->setItem(ui->data_table->rowCount() - 1, 0, item);
             ui->data_table->setItem(ui->data_table->rowCount() - 1, 1,
                     new QTableWidgetItem(QString::number(ui->data_table->rowCount())));
-            ui->data_table->setItem(
-                    ui->data_table->rowCount() - 1, 2, new QTableWidgetItem(QString::fromStdString(belief_string)));
-            ui->data_table->setItem(ui->data_table->rowCount() - 1, 3, new QTableWidgetItem(QString::fromStdString(goal_string)));
+            ui->data_table->setItem(ui->data_table->rowCount() - 1, 2,
+                    new QTableWidgetItem(QString::fromStdString(belief_string)));
+            ui->data_table->setItem(ui->data_table->rowCount() - 1, 3,
+                    new QTableWidgetItem(QString::fromStdString(goal_string)));
         }
     } else {
         QMessageBox::StandardButton solve_reply = QMessageBox::question(this, "Announcement Solver",
@@ -194,12 +195,12 @@ void MainWindow::on_generate_test_clicked() {
                 std::string goal_string = goal.str();
 
                 std::stringstream ss{shunting_yard(belief_string)};
-                std::vector<std::string> belief_tokens{
-                        std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+                std::vector<std::string> belief_tokens{std::istream_iterator<std::string>{ss},
+                        std::istream_iterator<std::string>{}};
 
                 ss = std::stringstream{shunting_yard(goal_string)};
-                std::vector<std::string> goal_tokens{
-                        std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+                std::vector<std::string> goal_tokens{std::istream_iterator<std::string>{ss},
+                        std::istream_iterator<std::string>{}};
 
                 agent_list.emplace_back(create_agent(belief_tokens, goal_tokens));
 
@@ -209,16 +210,26 @@ void MainWindow::on_generate_test_clicked() {
                 ui->data_table->setItem(ui->data_table->rowCount() - 1, 0, item);
                 ui->data_table->setItem(ui->data_table->rowCount() - 1, 1,
                         new QTableWidgetItem(QString::number(ui->data_table->rowCount())));
-                ui->data_table->setItem(
-                        ui->data_table->rowCount() - 1, 2, new QTableWidgetItem(QString::fromStdString(belief_string)));
-                ui->data_table->setItem(ui->data_table->rowCount() - 1, 3, new QTableWidgetItem(QString::fromStdString(goal_string)));
+                ui->data_table->setItem(ui->data_table->rowCount() - 1, 2,
+                        new QTableWidgetItem(QString::fromStdString(belief_string)));
+                ui->data_table->setItem(ui->data_table->rowCount() - 1, 3,
+                        new QTableWidgetItem(QString::fromStdString(goal_string)));
             }
         } else {
+            std::stringstream belief;
             for (int i = 0; i < agent_count; ++i) {
-                std::stringstream belief;
+                belief << (i + 1);
+                if (i < (agent_count - 1)) {
+                    belief << " and ";
+                }
+            }
+            std::stringstream ss{shunting_yard(belief.str())};
+            std::vector<std::string> belief_tokens{
+                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+            const auto agent_belief = get_dnf_from_equation(belief_tokens);
+            for (int i = 0; i < agent_count; ++i) {
                 std::stringstream goal;
 
-                belief << agent_count;
                 if (i & 1) {
                     goal << "not ";
                 }
@@ -227,15 +238,11 @@ void MainWindow::on_generate_test_clicked() {
                 std::string belief_string = belief.str();
                 std::string goal_string = goal.str();
 
-                std::stringstream ss{shunting_yard(belief_string)};
-                std::vector<std::string> belief_tokens{
-                        std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
-
                 ss = std::stringstream{shunting_yard(goal_string)};
-                std::vector<std::string> goal_tokens{
-                        std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+                std::vector<std::string> goal_tokens{std::istream_iterator<std::string>{ss},
+                        std::istream_iterator<std::string>{}};
 
-                agent_list.emplace_back(create_agent(belief_tokens, goal_tokens));
+                agent_list.push_back({agent_belief, get_dnf_from_equation(goal_tokens)});
 
                 ui->data_table->insertRow(ui->data_table->rowCount());
                 QTableWidgetItem* item = new QTableWidgetItem();
@@ -243,9 +250,10 @@ void MainWindow::on_generate_test_clicked() {
                 ui->data_table->setItem(ui->data_table->rowCount() - 1, 0, item);
                 ui->data_table->setItem(ui->data_table->rowCount() - 1, 1,
                         new QTableWidgetItem(QString::number(ui->data_table->rowCount())));
-                ui->data_table->setItem(
-                        ui->data_table->rowCount() - 1, 2, new QTableWidgetItem(QString::fromStdString(belief_string)));
-                ui->data_table->setItem(ui->data_table->rowCount() - 1, 3, new QTableWidgetItem(QString::fromStdString(goal_string)));
+                ui->data_table->setItem(ui->data_table->rowCount() - 1, 2,
+                        new QTableWidgetItem(QString::fromStdString(belief_string)));
+                ui->data_table->setItem(ui->data_table->rowCount() - 1, 3,
+                        new QTableWidgetItem(QString::fromStdString(goal_string)));
             }
         }
     }

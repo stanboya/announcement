@@ -6,7 +6,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(BASE_COMPILE_OPTIONS -Wall -Wextra -pedantic -pipe -march=native -fopenmp )
-set(DEBUG_OPTIONS ${BASE_COMPILE_OPTIONS} -g -O0)
+set(DEBUG_OPTIONS ${BASE_COMPILE_OPTIONS} -g -Og)
 set(RELEASE_OPTIONS ${BASE_COMPILE_OPTIONS} -O3)
 
 set(CMAKE_CXX_STANDARD 17)
