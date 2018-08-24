@@ -17,8 +17,9 @@
 #ifndef ANNOUNCE_H
 #define ANNOUNCE_H
 
-#include <vector>
 #include <cstdint>
+#include <string>
+#include <vector>
 
 struct agent {
     //Both of these vectors are in DNF
@@ -32,6 +33,5 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept;
 bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goals) noexcept;
 
 int32_t get_variable_count(const std::vector<agent>& agents) noexcept;
-
 
 #endif
