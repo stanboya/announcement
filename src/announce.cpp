@@ -37,14 +37,16 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
     if (goals_consistent(goals)) {
         std::cout << "Goals are consistent\n";
 
-        for (const auto& agent : agents) {
-            for (const auto& clause : agent.goal) {
-                for (const auto term : clause) {
-                    std::cout << term << " ";
+        if (verbose) {
+            for (const auto& agent : agents) {
+                for (const auto& clause : agent.goal) {
+                    for (const auto term : clause) {
+                        std::cout << term << " ";
+                    }
+                    std::cout << "\n";
                 }
                 std::cout << "\n";
             }
-            std::cout << "\n";
         }
 
         std::vector<std::vector<int32_t>> conjunction;
