@@ -54,14 +54,7 @@ bool sat(const std::vector<std::vector<int32_t>>& clause_list) noexcept {
         }
     }
 
-    bool trying_parallel = true;
-
-retry:
-    if (trying_parallel) {
-        system("./sat/parallel/glucose-syrup_release .tmp.input 2> /dev/null | grep -o 's [SU]' > .tmp.output");
-    } else {
-        system("./sat/simp/glucose_release .tmp.input 2> /dev/null | grep -o 's [SU]' > .tmp.output");
-    }
+    system("./sat/simp/glucose_release .tmp.input 2> /dev/null | grep -o 's [SU]' > .tmp.output");
 
     std::ifstream ifs{output_filename};
     if (!ifs) {
@@ -85,10 +78,6 @@ retry:
                     exit(EXIT_FAILURE);
             }
         }
-    }
-    if (trying_parallel) {
-        trying_parallel = false;
-        goto retry;
     }
     std::cerr << "SAT solver did not return proper output format\n";
     exit(EXIT_FAILURE);
