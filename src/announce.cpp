@@ -233,7 +233,12 @@ int32_t get_variable_count(const std::vector<agent>& agents) noexcept {
     for (const auto& ag : agents) {
         for (const auto& clause : ag.beliefs) {
             for (const auto term : clause) {
-                max_variable_count = std::max(max_variable_count, term);
+                max_variable_count = std::max(max_variable_count, std::abs(term));
+            }
+        }
+        for (const auto& clause : ag.goal) {
+            for (const auto term : clause) {
+                max_variable_count = std::max(max_variable_count, std::abs(term));
             }
         }
     }
