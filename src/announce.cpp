@@ -15,6 +15,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <climits>
 #include <cstdint>
@@ -75,7 +76,16 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
 
     const auto max_var = get_variable_count(agents);
     assert(max_var <= 64);
+
+    std::string ret_str;
+
+    std::atomic_bool is_done = false;
+
+#pragma omp parallel for schedule(static)
     for (uint64_t i = 0; i < (1ul << (max_var)); ++i) {
+        if (is_done) {
+            continue;
+        }
         std::vector<int32_t> test_case;
         for (auto j = 0; j < max_var; ++j) {
             const auto val = (1 << j) & i;
@@ -142,11 +152,20 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
                 }
                 if (count == 1) {
                     std::cout << "Minimization is possible\n";
-                    return get_minimal_formula(revised_beliefs);
+                    ret_str = get_minimal_formula(revised_beliefs);
+                    is_done = true;
                 }
             }
         }
-        return print_formula_dnf(revision_formula);
+        //Prevent overwriting return string if minimization was done
+        if (is_done) {
+            continue;
+        }
+        ret_str = print_formula_dnf(revision_formula);
+        is_done = true;
+    }
+    if (!ret_str.empty()) {
+        return ret_str;
     }
 
     std::cout << "No possible satisfying assignment was found\n";
@@ -209,4 +228,3 @@ int32_t get_variable_count(const std::vector<agent>& agents) noexcept {
     }
     return max_variable_count;
 }
-
