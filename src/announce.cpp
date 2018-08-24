@@ -136,6 +136,15 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
             }
             if (bad_solution) {
                 break;
+            } else {
+                std::cout << "almost\n\n";
+                print_formula_dnf(revision_formula);
+                for (const auto& ag : agents) {
+                    print_formula_dnf(ag.beliefs);
+                    print_formula_dnf(ag.goal);
+                    std::cout << "\n";
+                }
+                std::cout << "done\n";
             }
         }
         if (bad_solution) {
