@@ -33,7 +33,8 @@
 #include "tools.h"
 
 static struct option long_options[]
-        = {{"verbose", no_argument, 0, 'v'}, {"output", required_argument, 0, 'o'}, {0, 0, 0, 0}};
+        = {{"verbose", no_argument, 0, 'v'}, {"output", required_argument, 0, 'o'},
+                {"test", required_argument, 0, 't'}, {"brute", no_argument, 0, 'b'}, {0, 0, 0, 0}};
 
 #define print_help() \
     do { \
@@ -41,6 +42,7 @@ static struct option long_options[]
                "\t [v]erbose               - Output in verbose mode\n" \
                "\t [o]utput                - File to output belief announcement to\n" \
                "\t [t]est                  - Run worst case scenario test and exit\n" \
+               "\t [b]rute                 - Brute force all 2 variable combinations\n" \
                "\t [h]elp                  - this message\n"); \
     } while (0)
 
@@ -48,10 +50,11 @@ int main(int argc, char** argv) {
     const char* output_file = nullptr;
     verbose = false;
     int agent_count = 0;
+    bool brute_force = false;
     for (;;) {
         int c;
         int option_index = 0;
-        if ((c = getopt_long(argc, argv, "hvo:t:", long_options, &option_index)) == -1) {
+        if ((c = getopt_long(argc, argv, "hvo:t:b", long_options, &option_index)) == -1) {
             break;
         }
         switch (c) {
@@ -60,6 +63,9 @@ int main(int argc, char** argv) {
                 break;
             case 'o':
                 output_file = optarg;
+                break;
+            case 'b':
+                brute_force = true;
                 break;
             case 't':
                 agent_count = strtol(optarg, NULL, 10);
@@ -76,39 +82,7 @@ int main(int argc, char** argv) {
                 return EXIT_SUCCESS;
         }
     }
-    if (agent_count > 1) {
-#if 0
-        std::vector<agent> agent_list;
-        std::stringstream belief;
-        for (int i = 0; i < agent_count; ++i) {
-            belief << (i + 1);
-            if (i < (agent_count - 1)) {
-                belief << " and ";
-            }
-        }
-        std::stringstream ss{shunting_yard(belief.str())};
-        std::vector<std::string> belief_tokens{
-                std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
-        const auto agent_belief = get_dnf_from_equation(belief_tokens);
-        for (int i = 0; i < agent_count; ++i) {
-            std::stringstream goal;
-
-            if (i & 1) {
-                goal << "not ";
-            }
-            goal << 1;
-
-            std::string goal_string = goal.str();
-
-            ss = std::stringstream{shunting_yard(goal_string)};
-            std::vector<std::string> goal_tokens{
-                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
-
-            agent_list.push_back({agent_belief, get_dnf_from_equation(goal_tokens)});
-        }
-        find_announcement(agent_list);
-#else
-#if 1
+    if (brute_force) {
         std::vector<std::string> input_states;
         input_states.emplace_back("1 and 2");
         input_states.emplace_back("1 or 2");
@@ -155,93 +129,38 @@ int main(int argc, char** argv) {
         for (const auto& input : brute_input) {
             find_announcement(input);
         }
-#else
-        std::vector<std::string> input_states;
-        input_states.emplace_back("1 and 2 and 3");
-        input_states.emplace_back("1 or 2 and 3");
-        input_states.emplace_back("1 and not 2 and 3");
-        input_states.emplace_back("1 or not 2 and 3");
-        input_states.emplace_back("not 1 and 2 and 3");
-        input_states.emplace_back("not 1 or 2 and 3");
-        input_states.emplace_back("not 1 and not 2 and 3");
-        input_states.emplace_back("not 1 or not 2 and 3");
-        input_states.emplace_back("1 and 2 or 3");
-        input_states.emplace_back("1 or 2 or 3");
-        input_states.emplace_back("1 and not 2 or 3");
-        input_states.emplace_back("1 or not 2 or 3");
-        input_states.emplace_back("not 1 and 2 or 3");
-        input_states.emplace_back("not 1 or 2 or 3");
-        input_states.emplace_back("not 1 and not 2 or 3");
-        input_states.emplace_back("not 1 or not 2 or 3");
-        input_states.emplace_back("1 and 2 and not 3");
-        input_states.emplace_back("1 or 2 and not 3");
-        input_states.emplace_back("1 and not 2 and not 3");
-        input_states.emplace_back("1 or not 2 and not 3");
-        input_states.emplace_back("not 1 and 2 and not 3");
-        input_states.emplace_back("not 1 or 2 and not 3");
-        input_states.emplace_back("not 1 and not 2 and not 3");
-        input_states.emplace_back("not 1 or not 2 and not 3");
-        input_states.emplace_back("1 and 2 or not 3");
-        input_states.emplace_back("1 or 2 or not 3");
-        input_states.emplace_back("1 and not 2 or not 3");
-        input_states.emplace_back("1 or not 2 or not 3");
-        input_states.emplace_back("not 1 and 2 or not 3");
-        input_states.emplace_back("not 1 or 2 or not 3");
-        input_states.emplace_back("not 1 and not 2 or not 3");
-        input_states.emplace_back("not 1 or not 2 or not 3");
+        return EXIT_SUCCESS;
+    }
+    if (agent_count > 1) {
+        std::vector<agent> agent_list;
+        std::stringstream belief;
+        for (int i = 0; i < agent_count; ++i) {
+            belief << (i + 1);
+            if (i < (agent_count - 1)) {
+                belief << " and ";
+            }
+        }
+        std::stringstream ss{shunting_yard(belief.str())};
+        std::vector<std::string> belief_tokens{
+                std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+        const auto agent_belief = get_dnf_from_equation(belief_tokens);
+        for (int i = 0; i < agent_count; ++i) {
+            std::stringstream goal;
 
-        std::vector<std::vector<agent>> brute_input;
+            if (i & 1) {
+                goal << "not ";
+            }
+            goal << 1;
 
-        for (int i = 0; i < 1048576; ++i) {
-            const auto idx1 = i % 32;
-            const auto idx2 = (i / 32) % 32;
-            const auto idx3 = (i / 1024) % 32;
-            const auto idx4 = (i / 1024) / 32;
-            const auto idx5 = (i / 32768) % 32;
-            const auto idx6 = (i / 32768) / 32;
+            std::string goal_string = goal.str();
 
-            std::vector<agent> agent_list;
-
-            std::stringstream ss{shunting_yard(input_states[idx1])};
-            std::vector<std::string> belief_tokens{
-                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
-
-            ss = std::stringstream{shunting_yard(input_states[idx2])};
+            ss = std::stringstream{shunting_yard(goal_string)};
             std::vector<std::string> goal_tokens{
                     std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
 
-            agent_list.emplace_back(create_agent(belief_tokens, goal_tokens));
-
-            ss = std::stringstream{shunting_yard(input_states[idx3])};
-            belief_tokens = std::vector<std::string>{
-                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
-
-            ss = std::stringstream{shunting_yard(input_states[idx4])};
-            goal_tokens = std::vector<std::string>{
-                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
-
-            agent_list.emplace_back(create_agent(belief_tokens, goal_tokens));
-
-            brute_input.emplace_back(std::move(agent_list));
-
-            ss = std::stringstream{shunting_yard(input_states[idx5])};
-            belief_tokens = std::vector<std::string>{
-                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
-
-            ss = std::stringstream{shunting_yard(input_states[idx6])};
-            goal_tokens = std::vector<std::string>{
-                    std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
-
-            agent_list.emplace_back(create_agent(belief_tokens, goal_tokens));
-
-            brute_input.emplace_back(std::move(agent_list));
+            agent_list.push_back({agent_belief, get_dnf_from_equation(goal_tokens)});
         }
-
-        for (const auto& input : brute_input) {
-            find_announcement(input);
-        }
-#endif
-#endif
+        find_announcement(agent_list);
         return EXIT_SUCCESS;
     }
 
