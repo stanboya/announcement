@@ -20,6 +20,8 @@
 #include <climits>
 #include <cstdint>
 #include <iostream>
+#include <iterator>
+#include <sstream>
 #include <vector>
 
 #include "announce.h"
@@ -128,7 +130,7 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
                 print_formula_dnf(agent.goal);
             }
 
-#if 1
+#if 0
             for (const auto& clause : agent.goal) {
                 if (std::find(revised.cbegin(), revised.cend(), clause) == revised.cend()) {
                     bad_solution = true;
@@ -137,7 +139,8 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
             }
 #else
             for (const auto& clause : revised) {
-                if (std::find(agent.goal.cbegin(), agent.goal.cend(), clause) == agent.goal.cend()) {
+                if (std::find(agent.goal.cbegin(), agent.goal.cend(), clause)
+                        == agent.goal.cend()) {
                     bad_solution = true;
                     break;
                 }
@@ -186,6 +189,77 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
     }
     if (!ret_str.empty()) {
         return ret_str;
+    }
+
+    for (int i = 0; i < max_var * 2; ++i) {
+        std::vector<std::vector<int32_t>> revision_formula;
+        std::vector<int32_t> tmp;
+        if (i >= max_var) {
+            tmp.push_back(-((i % max_var) + 1));
+        } else {
+            tmp.push_back((i % max_var) + 1);
+        }
+        revision_formula.push_back(tmp);
+
+        bool bad_solution = false;
+
+        for (const auto& agent : agents) {
+            auto revised = belief_revise(agent.beliefs, revision_formula);
+            const auto abs_cmp
+                    = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
+            for (auto& clause : revised) {
+                std::sort(clause.begin(), clause.end(), abs_cmp);
+            }
+            std::sort(revised.begin(), revised.end());
+
+            if (verbose) {
+                std::cout << "\n";
+                std::cout << "Agent beliefs: \n";
+                print_formula_dnf(agent.beliefs);
+
+                std::cout << "Revision formula: \n";
+                print_formula_dnf(revision_formula);
+
+                std::cout << "Revised output: \n";
+                print_formula_dnf(revised);
+
+                std::cout << "Agent goal: \n";
+                print_formula_dnf(agent.goal);
+            }
+
+#if 0
+            for (const auto& clause : agent.goal) {
+                if (std::find(revised.cbegin(), revised.cend(), clause) == revised.cend()) {
+                    bad_solution = true;
+                    break;
+                }
+            }
+#else
+            for (const auto& clause : revised) {
+                if (std::find(agent.goal.cbegin(), agent.goal.cend(), clause)
+                        == agent.goal.cend()) {
+                    bad_solution = true;
+                    break;
+                }
+            }
+#endif
+            if (bad_solution) {
+                break;
+            } else {
+                std::cout << "almost\n\n";
+                print_formula_dnf(revision_formula);
+                for (const auto& ag : agents) {
+                    print_formula_dnf(ag.beliefs);
+                    print_formula_dnf(ag.goal);
+                    std::cout << "\n";
+                }
+                std::cout << "done\n";
+            }
+        }
+        if (!bad_solution) {
+            std::cout << "GOOD Found an announcement that works\n";
+            return print_formula_dnf(revision_formula);
+        }
     }
 
     std::cout << "No possible satisfying assignment was found\n";
