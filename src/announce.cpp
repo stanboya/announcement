@@ -128,12 +128,21 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
                 print_formula_dnf(agent.goal);
             }
 
+#if 1
             for (const auto& clause : agent.goal) {
                 if (std::find(revised.cbegin(), revised.cend(), clause) == revised.cend()) {
                     bad_solution = true;
                     break;
                 }
             }
+#else
+            for (const auto& clause : revised) {
+                if (std::find(agent.goal.cbegin(), agent.goal.cend(), clause) == agent.goal.cend()) {
+                    bad_solution = true;
+                    break;
+                }
+            }
+#endif
             if (bad_solution) {
                 break;
             } else {
@@ -150,7 +159,7 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
         if (bad_solution) {
             continue;
         }
-        std::cout << "Found an announcement that works\n";
+        std::cout << "GOOD Found an announcement that works\n";
         const auto revised_beliefs = convert_dnf_to_raw(revision_formula);
         for (const auto& first : revised_beliefs) {
             for (const auto& second : revised_beliefs) {
