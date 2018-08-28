@@ -178,6 +178,18 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
         conjunction = convert_normal_forms(conjunction);
     }
 
+    for (auto& clause : conjunction) {
+        //Sort the conjunction in variable order
+        std::sort(clause.begin(), clause.end(),
+                [](const auto lhs, const auto rhs) { return std::abs(lhs) < std::abs(rhs); });
+    }
+    std::sort(conjunction.begin(), conjunction.end());
+    conjunction.erase(std::unique(conjunction.begin(), conjunction.end()), conjunction.end());
+    conjunction.erase(std::remove_if(conjunction.begin(), conjunction.end(),
+                              [](const auto& clause) { return clause.empty(); }),
+            conjunction.end());
+    conjunction.shrink_to_fit();
+
     //simplify_dnf(conjunction);
 
     if (conjunction.empty()) {

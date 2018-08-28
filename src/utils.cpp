@@ -25,8 +25,8 @@
 #include <utility>
 #include <vector>
 
-#include "utils.h"
 #include "interactive.h"
+#include "utils.h"
 
 std::vector<std::vector<bool>> convert_to_bool(
         const std::vector<std::vector<int32_t>>& state) noexcept {
@@ -133,7 +133,6 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
                 result.emplace_back(std::move(extended_result));
             }
         }
-#if 1
         for (auto& clause : result) {
             //Sort the result in variable order
             std::sort(clause.begin(), clause.end(),
@@ -144,8 +143,7 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
         result.erase(std::remove_if(result.begin(), result.end(),
                              [](const auto& clause) { return clause.empty(); }),
                 result.end());
-        //result.shrink_to_fit();
-#endif
+        result.shrink_to_fit();
 
         //simplify_dnf(result);
 
