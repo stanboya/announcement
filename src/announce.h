@@ -34,4 +34,6 @@ bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goal
 
 int32_t get_variable_count(const std::vector<agent>& agents) noexcept;
 
+bool test_announcement(const std::vector<agent>& agents, const std::vector<std::vector<int32_t>>& revision_formula) noexcept;
+
 #endif

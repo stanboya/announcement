@@ -104,88 +104,11 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
         std::vector<std::vector<int32_t>> revision_formula;
         revision_formula.emplace_back(std::move(test_case));
 
-        bool bad_solution = false;
-
-        for (const auto& agent : agents) {
-            auto revised = belief_revise(agent.beliefs, revision_formula);
-            const auto abs_cmp
-                    = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
-            for (auto& clause : revised) {
-                std::sort(clause.begin(), clause.end(), abs_cmp);
-            }
-            std::sort(revised.begin(), revised.end());
-
-            if (verbose) {
-                std::cout << "\n";
-                std::cout << "Agent beliefs: \n";
-                print_formula_dnf(agent.beliefs);
-
-                std::cout << "Revision formula: \n";
-                print_formula_dnf(revision_formula);
-
-                std::cout << "Revised output: \n";
-                print_formula_dnf(revised);
-
-                std::cout << "Agent goal: \n";
-                print_formula_dnf(agent.goal);
-            }
-
-#if 0
-            for (const auto& clause : agent.goal) {
-                if (std::find(revised.cbegin(), revised.cend(), clause) == revised.cend()) {
-                    bad_solution = true;
-                    break;
-                }
-            }
-#else
-            for (const auto& clause : revised) {
-                if (std::find(agent.goal.cbegin(), agent.goal.cend(), clause)
-                        == agent.goal.cend()) {
-                    bad_solution = true;
-                    break;
-                }
-            }
-#endif
-            if (bad_solution) {
-                break;
-            } else {
-                std::cout << "almost\n\n";
-                print_formula_dnf(revision_formula);
-                for (const auto& ag : agents) {
-                    print_formula_dnf(ag.beliefs);
-                    print_formula_dnf(ag.goal);
-                    std::cout << "\n";
-                }
-                std::cout << "done\n";
-            }
+        if (test_announcement(agents, revision_formula)) {
+            std::cout << "GOOD Found an announcement that works\n";
+            ret_str = print_formula_dnf(revision_formula);
+            is_done = true;
         }
-        if (bad_solution) {
-            continue;
-        }
-        std::cout << "GOOD Found an announcement that works\n";
-        const auto revised_beliefs = convert_dnf_to_raw(revision_formula);
-        for (const auto& first : revised_beliefs) {
-            for (const auto& second : revised_beliefs) {
-                if (first == second) {
-                    continue;
-                }
-                unsigned long count = 0;
-                for (unsigned long k = 0; k < first.size(); ++k) {
-                    count += first[k] ^ second[k];
-                }
-                if (count == 1) {
-                    std::cout << "Minimization is possible\n";
-                    ret_str = get_minimal_formula(revised_beliefs);
-                    is_done = true;
-                }
-            }
-        }
-        //Prevent overwriting return string if minimization was done
-        if (is_done) {
-            continue;
-        }
-        ret_str = print_formula_dnf(revision_formula);
-        is_done = true;
     }
     if (!ret_str.empty()) {
         return ret_str;
@@ -201,62 +124,7 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
         }
         revision_formula.push_back(tmp);
 
-        bool bad_solution = false;
-
-        for (const auto& agent : agents) {
-            auto revised = belief_revise(agent.beliefs, revision_formula);
-            const auto abs_cmp
-                    = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
-            for (auto& clause : revised) {
-                std::sort(clause.begin(), clause.end(), abs_cmp);
-            }
-            std::sort(revised.begin(), revised.end());
-
-            if (verbose) {
-                std::cout << "\n";
-                std::cout << "Agent beliefs: \n";
-                print_formula_dnf(agent.beliefs);
-
-                std::cout << "Revision formula: \n";
-                print_formula_dnf(revision_formula);
-
-                std::cout << "Revised output: \n";
-                print_formula_dnf(revised);
-
-                std::cout << "Agent goal: \n";
-                print_formula_dnf(agent.goal);
-            }
-
-#if 0
-            for (const auto& clause : agent.goal) {
-                if (std::find(revised.cbegin(), revised.cend(), clause) == revised.cend()) {
-                    bad_solution = true;
-                    break;
-                }
-            }
-#else
-            for (const auto& clause : revised) {
-                if (std::find(agent.goal.cbegin(), agent.goal.cend(), clause)
-                        == agent.goal.cend()) {
-                    bad_solution = true;
-                    break;
-                }
-            }
-#endif
-            if (bad_solution) {
-                break;
-            } else {
-                std::cout << "almost\n\n";
-                print_formula_dnf(revision_formula);
-                for (const auto& ag : agents) {
-                    print_formula_dnf(ag.beliefs);
-                    print_formula_dnf(ag.goal);
-                    std::cout << "\n";
-                }
-                std::cout << "done\n";
-            }
-        }
-        if (!bad_solution) {
+        if (test_announcement(agents, revision_formula)) {
             std::cout << "GOOD Found an announcement that works\n";
             return print_formula_dnf(revision_formula);
         }
@@ -337,4 +205,38 @@ int32_t get_variable_count(const std::vector<agent>& agents) noexcept {
         }
     }
     return max_variable_count;
+}
+
+bool test_announcement(const std::vector<agent>& agents,
+        const std::vector<std::vector<int32_t>>& revision_formula) noexcept {
+    for (const auto& agent : agents) {
+        auto revised = belief_revise(agent.beliefs, revision_formula);
+        const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
+        for (auto& clause : revised) {
+            std::sort(clause.begin(), clause.end(), abs_cmp);
+        }
+        std::sort(revised.begin(), revised.end());
+
+        if (verbose) {
+            std::cout << "\n";
+            std::cout << "Agent beliefs: \n";
+            print_formula_dnf(agent.beliefs);
+
+            std::cout << "Revision formula: \n";
+            print_formula_dnf(revision_formula);
+
+            std::cout << "Revised output: \n";
+            print_formula_dnf(revised);
+
+            std::cout << "Agent goal: \n";
+            print_formula_dnf(agent.goal);
+        }
+
+        for (const auto& clause : agent.goal) {
+            if (std::find(revised.cbegin(), revised.cend(), clause) == revised.cend()) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
