@@ -81,53 +81,58 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
     const auto max_var = get_variable_count(agents);
     assert(max_var <= 64);
 
-    std::string ret_str;
+    for (auto i = 1; i <= max_var; ++i) {
+        std::vector<bool> v(max_var);
+        std::fill(v.begin(), v.begin() + i, true);
 
-    std::atomic_bool is_done{false};
-
-#pragma omp parallel for schedule(static)
-    for (uint64_t i = 0; i < (1ul << (max_var)); ++i) {
-        if (is_done) {
-            continue;
-        }
-        std::vector<int32_t> test_case;
-        for (auto j = 0; j < max_var; ++j) {
-            const auto val = (1 << j) & i;
-            if (val) {
-                test_case.emplace_back((j + 1));
-            } else {
-                test_case.emplace_back(-(j + 1));
+        //Generate all length i combinations of variables
+        do {
+            std::vector<int32_t> combination;
+            for (int j = 0; j < max_var; ++j) {
+                if (v[j]) {
+                    combination.emplace_back(j + 1);
+                }
             }
-        }
-        //Now test_case is a n bit brute force generating DNF formulas
-        //Need to do belief revision on this and compare with goals
-        std::vector<std::vector<int32_t>> revision_formula;
-        revision_formula.emplace_back(std::move(test_case));
 
-        if (test_announcement(agents, revision_formula)) {
-            std::cout << "GOOD Found an announcement that works\n";
-            ret_str = print_formula_dnf(revision_formula);
-            is_done = true;
-        }
-    }
-    if (!ret_str.empty()) {
-        return ret_str;
-    }
+            //Generate all variable negation variations
+            for (uint64_t j = 0; j < (1ul << i); ++j) {
+                std::vector<int32_t> negated_comb{combination};
+                for (auto k = 0; k < i; ++k) {
+                    const auto val = (1 << k) & j;
+                    if (!val) {
+                        negated_comb[k] *= -1;
+                    }
+                }
 
-    for (int i = 0; i < max_var * 2; ++i) {
-        std::vector<std::vector<int32_t>> revision_formula;
-        std::vector<int32_t> tmp;
-        if (i >= max_var) {
-            tmp.push_back(-((i % max_var) + 1));
-        } else {
-            tmp.push_back((i % max_var) + 1);
-        }
-        revision_formula.push_back(tmp);
+                //Generate all conjunction permutations
+                for (uint64_t k = 0; k < (1ul << (i - 1)); ++k) {
+                    std::vector<bool> conjunctions;
+                    for (auto l = 0; l < (i - 1); ++l) {
+                        const auto val = (1 << l) & k;
+                        conjunctions.emplace_back(val);
+                    }
 
-        if (test_announcement(agents, revision_formula)) {
-            std::cout << "GOOD Found an announcement that works\n";
-            return print_formula_dnf(revision_formula);
-        }
+                    std::vector<std::vector<int32_t>> revision_formula;
+                    for (auto l = 0; l < i; ++l) {
+                        if (l == 0) {
+                            revision_formula.push_back({negated_comb[0]});
+                        } else {
+                            if (conjunctions[l - 1]) {
+                                //AND
+                                revision_formula.back().push_back(negated_comb[l]);
+                            } else {
+                                //OR
+                                revision_formula.push_back({negated_comb[l]});
+                            }
+                        }
+                    }
+                    if (test_announcement(agents, revision_formula)) {
+                        std::cout << "GOOD Found an announcement that works\n";
+                        return print_formula_dnf(revision_formula);
+                    }
+                }
+            }
+        } while (std::prev_permutation(v.begin(), v.end()));
     }
 
     std::cout << "No possible satisfying assignment was found\n";
