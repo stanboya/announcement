@@ -237,8 +237,8 @@ bool test_announcement(const std::vector<agent>& agents,
             print_formula_dnf(agent.goal);
         }
 
-        for (const auto& clause : agent.goal) {
-            if (std::find(revised.cbegin(), revised.cend(), clause) == revised.cend()) {
+        for (const auto& clause : revised) {
+            if (std::find(agent.goal.cbegin(), agent.goal.cend(), clause) == agent.goal.cend()) {
                 return false;
             }
         }
