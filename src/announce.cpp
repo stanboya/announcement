@@ -83,7 +83,7 @@ std::string find_announcement(const std::vector<agent>& agents) noexcept {
 
     std::string ret_str;
 
-    std::atomic_bool is_done = false;
+    std::atomic_bool is_done{false};
 
 #pragma omp parallel for schedule(static)
     for (uint64_t i = 0; i < (1ul << (max_var)); ++i) {
