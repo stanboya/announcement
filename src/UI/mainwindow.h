@@ -23,8 +23,6 @@ private slots:
 
     void on_calculate_announcement_clicked();
 
-    void on_generate_test_clicked();
-
 private:
     Ui::MainWindow *ui;
 
