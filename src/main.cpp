@@ -33,36 +33,31 @@
 #include "tools.h"
 
 static struct option long_options[]
-        = {{"verbose", no_argument, 0, 'v'}, {"output", required_argument, 0, 'o'},
-                {"test", required_argument, 0, 't'}, {"brute", no_argument, 0, 'b'}, {0, 0, 0, 0}};
+        = {{"verbose", no_argument, 0, 'v'}, {"test", required_argument, 0, 't'},
+                {"brute", no_argument, 0, 'b'}, {"help", no_argument, 0, 'h'}, {0, 0, 0, 0}};
 
 #define print_help() \
     do { \
         printf("usage options:\n" \
                "\t [v]erbose               - Output in verbose mode\n" \
-               "\t [o]utput                - File to output belief announcement to\n" \
                "\t [t]est                  - Run worst case scenario test and exit\n" \
                "\t [b]rute                 - Brute force all 2 variable combinations\n" \
                "\t [h]elp                  - this message\n"); \
     } while (0)
 
 int main(int argc, char** argv) {
-    const char* output_file = nullptr;
     verbose = false;
     int agent_count = 0;
     bool brute_force = false;
     for (;;) {
         int c;
         int option_index = 0;
-        if ((c = getopt_long(argc, argv, "hvo:t:b", long_options, &option_index)) == -1) {
+        if ((c = getopt_long(argc, argv, "hvt:b", long_options, &option_index)) == -1) {
             break;
         }
         switch (c) {
             case 'v':
                 verbose = true;
-                break;
-            case 'o':
-                output_file = optarg;
                 break;
             case 'b':
                 brute_force = true;
