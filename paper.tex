@@ -4,8 +4,8 @@
 \usepackage[T1]{fontenc}
 \usepackage[latin9]{inputenc}
 \usepackage{float}
-\usepackage{babel}
 \usepackage{algorithm}
+\usepackage{babel}
 
 \begin{document}
 
@@ -66,7 +66,7 @@ and Alpha-Beta pruning.
 \item \textbf{For }\emph{i = }1 \textbf{up to} \emph{N}
 \begin{enumerate}
 \item $R=BeliefRevise(\beta_{i},\phi)$
-\item \textbf{if $R\cap\gamma_{i}=\emptyset$ then goto 2}
+\item \textbf{if} $R\subseteq\gamma_{i}$ \textbf{then goto 2}
 \end{enumerate}
 \item \textbf{end for}
 \item \textbf{return $\phi$}
@@ -87,10 +87,10 @@ not satisfied, then the formula is not a valid solution, so exit that
 iteration and get a new formula to test. If all agents are satisfied,
 that formula is the announcement solution. If no possible formula
 satisfies all agents, then the problem has no solution. \emph{GetNextFormula()
-}returns the next formula in an \emph{$O(2^{M})$} brute force where
-\emph{M} is the total number of variables in the set of agent beliefs
-and goals. Belief Revision is performed through an external tool known
-as GenC.
+}returns the next formula in an \emph{$O(2^{3M-1})$} brute force
+where \emph{M} is the total number of variables in the set of agent
+beliefs and goals. Belief Revision is performed through an external
+tool known as GenC.
 
 \section{Implementation}
 
@@ -104,7 +104,14 @@ are human readable formula strings such as ``(1 and 2 or (3 and not
 are limited to AND, OR, and NOT. This allows efficient representation
 and input of fairly complex formulae from a user standpoint. Output
 is displayed through pop-up message boxes displaying the relevant
-information, be it an error, or the solution to the problem.
+information, be it an error, or the solution to the problem. For a
+full list of constraints required of the input formulas, see GenC.
+The tool also supports some benchmarking options that bypass the GUI.
+It supports both a worst-case n-variable solve, which trivially has
+no solution, and a full enumeration of the 2-variable input space
+for 2 agents. These options allow one to test the scaling of the tool
+without having to manually enter large complex equations into a user
+interface.
 
 \subsection{Data Representation}
 
@@ -113,9 +120,13 @@ where the integer is the variable number, and its sign represents
 logical negation. All manipulation and I/O is based around this construct,
 and is converted to and from other forms transparently by the application.
 For enumerating the list of possible revision formulas, this is performed
-as a brute force, where each bit is converted into a term for the
-revision formula in DNF. For example, the binary string 1011 would
-translate into ``1 and not 2 and 3 and 4''. This is how the \emph{GetNextFormula()}
+as a brute force, split into multiple sections. The first section
+enumerates the list of all possible combinations of varying lengths.
+For each combination, the data is negated through an N-bit brute force
+to obtain all possible logical negation states. For each possible
+set of negated inputs, conjunctions between variables are generated
+through an N-1 bit brute force. The total operation has complexity
+$O(2^{N}*2^{N}*2^{N-1})=O(2^{3N-1})$. This is how the \emph{GetNextFormula()}
 function is implemented in section 3. 
 
 \section{Conclusion}
