@@ -2,9 +2,10 @@
 This application computes the solution to a shared belief revision announcement problem given a set of agents with initial beliefs, and their respective goals.
 
 ## Usage:
-`./bin/announcement`
-
-All program interaction is done through a GUI
+`./bin/announcement` will launch the GUI
+`./bin/announcement -h` will display command-line argument options
+`./bin/announcement -t n` will generate a problem with n variables and no possible solution. This is useful for benchmarking the scaling of the tool.
+`./bin/announcement -b` will perform a full brute force of the 2-bit variable input space using 2 agents. This can also be used for benchmarking, but also for testing correctness.
 
 ## Input formats:
 Input data is entered manually through formula strings
