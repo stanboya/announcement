@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 struct agent {
     //Both of these vectors are in DNF
@@ -28,6 +29,9 @@ struct agent {
 };
 
 std::string find_announcement(const std::vector<agent>& agents) noexcept;
+std::string find_announcement_KB(const std::vector<agent>& agents) noexcept;
+
+std::unordered_set<int32_t> get_terms_from_DNF(const std::vector<std::vector<int32_t>> clauses);
 
 //Goals must be vector of DNF formulas
 bool goals_consistent(const std::vector<std::vector<std::vector<int32_t>>>& goals) noexcept;

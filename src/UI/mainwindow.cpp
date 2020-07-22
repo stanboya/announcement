@@ -84,7 +84,7 @@ void MainWindow::on_calculate_announcement_clicked() {
     if (!agent_list.empty()) {
         //find_announcement(agent_list);
         QMessageBox::information(
-                this, tr("Announcement Solver"), tr(find_announcement(agent_list).c_str()));
+                this, tr("Announcement Solver"), tr(find_announcement_KB(agent_list).c_str()));
     } else {
         QMessageBox::information(this, tr("Announcement Solver"),
                 tr("You have to enter an entry before you can find an announcement"));

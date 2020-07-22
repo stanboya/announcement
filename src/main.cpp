@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
         }
 
         for (const auto& input : brute_input) {
-            find_announcement(input);
+            find_announcement_KB(input);
         }
         return EXIT_SUCCESS;
     }
@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
 
             agent_list.push_back({agent_belief, get_dnf_from_equation(goal_tokens)});
         }
-        find_announcement(agent_list);
+        find_announcement_KB(agent_list);
         return EXIT_SUCCESS;
     }
 

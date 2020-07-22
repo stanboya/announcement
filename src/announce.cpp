@@ -23,11 +23,64 @@
 #include <iterator>
 #include <sstream>
 #include <vector>
+#include <unordered_set>
 
 #include "announce.h"
 #include "interactive.h"
 #include "tools.h"
 #include "utils.h"
+
+std::unordered_set<int32_t> get_terms_from_DNF(const std::vector<std::vector<int32_t>> clauses) {
+    std::unordered_set<int32_t> terms{};
+    std::unordered_set<int32_t> removed_terms{};
+    for(const auto& clause : clauses) {
+        for(const auto term : clause) {
+            if(removed_terms.find(std::abs(term)) == removed_terms.end()) {
+                if(terms.find(-term) != terms.end()) {
+                    terms.erase(-term);
+                    removed_terms.insert(std::abs(term));
+                }
+                else {
+                    terms.insert(term);
+                }
+            }
+        }
+    }
+
+    return terms;
+}
+
+std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
+    std::unordered_set<int32_t> terms{};
+    std::unordered_set<int32_t> removed_terms{};
+    for(const auto& agent : agents) {
+        auto agent_terms = get_terms_from_DNF(agent.goal);
+        
+        for(const auto term : agent_terms) {
+            if(removed_terms.find(std::abs(term)) == removed_terms.end()) {
+                if(terms.find(-term) != terms.end()) {
+                    terms.erase(-term);
+                    removed_terms.insert(std::abs(term));
+                }
+                else {
+                    terms.insert(term);
+                }
+            }
+        }
+        
+    }
+
+    if (terms.empty()) {
+        return "Inconsistent Revising Formula for agents.";
+    }
+    else {
+        std::vector<int32_t> phi{};
+        for(const auto& term : terms) {
+            phi.push_back(term);
+        }
+        return print_formula_dnf(std::vector<std::vector<int32_t>> { phi });
+    }
+}
 
 std::string find_announcement(const std::vector<agent>& agents) noexcept {
     std::vector<std::vector<std::vector<int32_t>>> goals;
