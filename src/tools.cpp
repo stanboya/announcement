@@ -163,7 +163,7 @@ std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<in
 
     assert(!bel.empty());
     assert(!converted_form.empty());
-
+    
 
     for(auto cnf_state : converted_form) {
         std::cout << "(";

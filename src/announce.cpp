@@ -56,13 +56,37 @@ std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
     std::vector<std::vector<int32_t>> phi_belief_state_dnf{};
     
     std::vector<unsigned long> minimum_hamming_distances{};
+    
 
     std::vector<std::vector<std::vector<bool>>> K_beliefs{}, G_beliefs{};
     for(const auto& agent : agents) {
-        K_beliefs.push_back(convert_dnf_to_raw(agent.beliefs));
+        std::vector<std::vector<int32_t>> agentBelief_converted_form{};
+        for(size_t i = 0; i < agent.beliefs.front().size(); i++) {
+            std::vector<int32_t> cnf_clause{};
+            for (const auto clause : agent.beliefs) {
+                
+                cnf_clause.emplace_back(clause[i]);
+                
+            }
+            agentBelief_converted_form.emplace_back(std::move(cnf_clause));
+        }
+        K_beliefs.push_back(convert_dnf_to_raw(allsat(agentBelief_converted_form)));
         print_formula_dnf(agent.goal);
-        G_beliefs.push_back(convert_dnf_to_raw(agent.goal));
+
+        std::vector<std::vector<int32_t>> agentGoal_converted_form{};
+        for(size_t i = 0; i < agent.goal.front().size(); i++) {
+            std::vector<int32_t> cnf_clause{};
+            for (const auto clause : agent.goal) {
+                
+                cnf_clause.emplace_back(clause[i]);
+                
+            }
+            agentGoal_converted_form.emplace_back(std::move(cnf_clause));
+        }
+        G_beliefs.push_back(convert_dnf_to_raw(allsat(agentGoal_converted_form)));
     }
+
+    
 
     for(size_t i{ 0 }; i < K_beliefs.size(); i++) {
         
@@ -78,6 +102,8 @@ std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
 
         minimum_hamming_distances.push_back(minimumHammingDistance);
     }
+
+    
     
     std::vector<std::vector<bool>> phi_belief_state{};
     for(size_t i{ 0 }; i < G_beliefs.size(); i++) {
@@ -87,8 +113,7 @@ std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
                 // bool state_possible{ true };
                 // for(size_t j = 0; j < K_beliefs.size(); j++) {
                 //     if(state_difference(state, K_beliefs[j]) == minimum_hamming_distances[j] && std::find(G_beliefs[j].begin(), G_beliefs[j].end(), state) == G_beliefs[j].end()) {
-                //         state_possible = false;
-                //         break;
+                //         return "No possible satisfying assignment was found\n";
                 //     }
                 // }
                 // if(state_possible) {
@@ -106,16 +131,15 @@ std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
         std::cout << std::endl;
     }
     std::cout << std::endl;
-
-    std::vector<std::vector<bool>> phi_belief_state_min_dist{  };
-
+    
     if (phi_belief_state.empty() || !test_announcement(agents, convert_raw(phi_belief_state))) {
         return "No possible satisfying assignment was found\n";
     }
     else {
         phi_belief_state_dnf = convert_raw(phi_belief_state);
+        
         simplify_dnf(phi_belief_state_dnf);
-        return print_formula_dnf(phi_belief_state_dnf);
+        return print_formula_dnf(minimize_output(phi_belief_state_dnf));
         
     }
 
@@ -318,10 +342,13 @@ int32_t get_variable_count(const std::vector<agent>& agents) noexcept {
 
 bool test_announcement(const std::vector<agent>& agents,
         const std::vector<std::vector<int32_t>>& revision_formula) noexcept {
+    
     for (const auto& agent : agents) {
         auto agentBeliefs = agent.beliefs;
+        
         auto revised = belief_revise(agentBeliefs, revision_formula);
         const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
+        
         for (auto& clause : revised) {
             std::sort(clause.begin(), clause.end(), abs_cmp);
         }
@@ -340,6 +367,10 @@ bool test_announcement(const std::vector<agent>& agents,
 
         std::cout << "Agent goal: ";
         print_formula_dnf(agent.goal);
+
+        if(revised.empty() && !agent.goal.empty()) {
+            return false;
+        }
 
         for (const auto& clause : revised) {
             if (std::find(agent.goal.cbegin(), agent.goal.cend(), clause) == agent.goal.cend()) {
