@@ -241,43 +241,43 @@ TEST_CASE("Basic Test 5") {
     
 }
 
-// TEST_CASE("Basic Failing Test") {
-//     std::string belief1str, belief2str, goal1str, goal2str;
+TEST_CASE("Basic Failing Test") {
+    std::string belief1str, belief2str, goal1str, goal2str;
 
-//     belief1str = "(not 1) or 2";
-//     goal1str = "2 and (not 1)";
-//     belief2str = "(not 1) or (not 2)";
-//     goal2str = "(not 2) and 1";
+    belief1str = "(not 1) or 2";
+    goal1str = "2 and (not 1)";
+    belief2str = "(not 1) or (not 2)";
+    goal2str = "(not 2) and 1";
 
 
-//     std::vector<agent> agents{};
+    std::vector<agent> agents{};
 
-//     std::stringstream ss{shunting_yard(belief1str)};
-//     std::vector<std::string> belief1_tokens{
-//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+    std::stringstream ss{shunting_yard(belief1str)};
+    std::vector<std::string> belief1_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
 
-//     ss = std::stringstream{shunting_yard(goal1str)};
-//     std::vector<std::string> goal1_tokens{
-//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+    ss = std::stringstream{shunting_yard(goal1str)};
+    std::vector<std::string> goal1_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
 
-//     agents.emplace_back(create_agent(belief1_tokens, goal1_tokens));
+    agents.emplace_back(create_agent(belief1_tokens, goal1_tokens));
 
-//     ss = std::stringstream{shunting_yard(belief2str)};
-//     std::vector<std::string> belief2_tokens{
-//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+    ss = std::stringstream{shunting_yard(belief2str)};
+    std::vector<std::string> belief2_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
 
-//     ss = std::stringstream{shunting_yard(goal2str)};
-//     std::vector<std::string> goal2_tokens{
-//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+    ss = std::stringstream{shunting_yard(goal2str)};
+    std::vector<std::string> goal2_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
 
-//     agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
+    agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
 
-//     // SECTION("John's Implementation") {
-//     //     REQUIRE(find_announcement(agents) == "No possible satisfying assignment was found\n");
-//     // }
+    // SECTION("John's Implementation") {
+    //     REQUIRE(find_announcement(agents) == "No possible satisfying assignment was found\n");
+    // }
     
-//     SECTION("Konstantin's Implementation") {
-//         REQUIRE(find_announcement_KB(agents) == "No possible satisfying assignment was found\n");
-//     }
-// }
+    SECTION("Konstantin's Implementation") {
+        REQUIRE(find_announcement_KB(agents) == "No possible satisfying assignment was found\n");
+    }
+}
 
