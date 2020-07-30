@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include "belief.h"
 
 struct agent {
     //Both of these vectors are in DNF

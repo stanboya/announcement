@@ -67,12 +67,6 @@ std::vector<std::vector<int32_t>> convert_to_num(
 
 std::string print_formula_dnf(const std::vector<std::vector<int32_t>>& formula) noexcept {
     std::stringstream ss;
-    for (const auto& clause : formula) {
-        for (const auto term : clause) {
-            ss << term << " ";
-        }
-        ss << "\n";
-    }
 
     for (const auto& clause : formula) {
         ss << '(';

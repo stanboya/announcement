@@ -19,9 +19,16 @@
 
 #include <vector>
 #include <cstdint>
+#include <bitset>
+#include <unordered_map>
 
 bool sat(const std::vector<std::vector<int32_t>>& formula) noexcept;
 std::vector<std::vector<int32_t>> allsat(const std::vector<std::vector<int32_t>>& formula) noexcept;
 std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<int32_t>>& beliefs, const std::vector<std::vector<int32_t>>& revision_formula) noexcept;
+std::vector<std::vector<int32_t>> belief_revise_KB(const std::vector<std::vector<int32_t>>& beliefs, const std::vector<std::vector<int32_t>>& revision_formula) noexcept;
+unsigned long hamming(
+        const std::bitset<512>& state, const std::vector<std::bitset<512>>& belief_set) noexcept;
+unsigned long state_difference(
+        const std::vector<bool>& state, const std::vector<std::vector<bool>>& belief_set);
 
 #endif

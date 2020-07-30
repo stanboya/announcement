@@ -23,7 +23,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(ANNOUNCE_SRCS
-    src/main.cpp
+    # src/main.cpp
     src/tools.cpp
     src/tools.h
     src/file.cpp
@@ -31,12 +31,14 @@ set(ANNOUNCE_SRCS
     src/utils.cpp
     src/utils.h
     src/announce.cpp
+    src/announce.tests.cpp      # ONLY FOR TESTING
     src/announce.h
     src/interactive.cpp
     src/interactive.h
-    src/UI/mainwindow.h
-    src/UI/mainwindow.cpp
-    src/UI/mainwindow.ui
+    src/testing-main.cpp        # ONLY FOR TESTING
+    # src/UI/mainwindow.h
+    # src/UI/mainwindow.cpp
+    # src/UI/mainwindow.ui
     belief_revise/src/belief.cpp
 )
 

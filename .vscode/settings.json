@@ -60,6 +60,11 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "set": "cpp",
+        "regex": "cpp",
+        "future": "cpp",
+        "iomanip": "cpp",
+        "shared_mutex": "cpp"
     }
 }

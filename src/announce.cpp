@@ -24,6 +24,7 @@
 #include <sstream>
 #include <vector>
 #include <unordered_set>
+#include <bitset>
 
 #include "announce.h"
 #include "interactive.h"
@@ -51,35 +52,73 @@ std::unordered_set<int32_t> get_terms_from_DNF(const std::vector<std::vector<int
 }
 
 std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
-    std::unordered_set<int32_t> terms{};
-    std::unordered_set<int32_t> removed_terms{};
+
+    std::vector<std::vector<int32_t>> phi_belief_state_dnf{};
+    
+    std::vector<unsigned long> minimum_hamming_distances{};
+
+    std::vector<std::vector<std::vector<bool>>> K_beliefs{}, G_beliefs{};
     for(const auto& agent : agents) {
-        auto agent_terms = get_terms_from_DNF(agent.goal);
+        K_beliefs.push_back(convert_dnf_to_raw(agent.beliefs));
+        print_formula_dnf(agent.goal);
+        G_beliefs.push_back(convert_dnf_to_raw(agent.goal));
+    }
+
+    for(size_t i{ 0 }; i < K_beliefs.size(); i++) {
         
-        for(const auto term : agent_terms) {
-            if(removed_terms.find(std::abs(term)) == removed_terms.end()) {
-                if(terms.find(-term) != terms.end()) {
-                    terms.erase(-term);
-                    removed_terms.insert(std::abs(term));
-                }
-                else {
-                    terms.insert(term);
-                }
+        unsigned long minimumHammingDistance{ std::numeric_limits<unsigned long>::max() };
+        for(const auto& G_belief : G_beliefs[i]) {
+            
+            auto hamming_distance = state_difference(G_belief, K_beliefs[i]);
+            
+            if(minimumHammingDistance > hamming_distance) {
+                minimumHammingDistance = hamming_distance;
             }
         }
+
+        minimum_hamming_distances.push_back(minimumHammingDistance);
+    }
+    
+    std::vector<std::vector<bool>> phi_belief_state{};
+    for(size_t i{ 0 }; i < G_beliefs.size(); i++) {
+
+        for(const auto& state : G_beliefs[i]) {
+            if(std::find(phi_belief_state.begin(), phi_belief_state.end(), state) == phi_belief_state.end()) {
+                // bool state_possible{ true };
+                // for(size_t j = 0; j < K_beliefs.size(); j++) {
+                //     if(state_difference(state, K_beliefs[j]) == minimum_hamming_distances[j] && std::find(G_beliefs[j].begin(), G_beliefs[j].end(), state) == G_beliefs[j].end()) {
+                //         state_possible = false;
+                //         break;
+                //     }
+                // }
+                // if(state_possible) {
+                    phi_belief_state.push_back(state);
+                // }    
+            }
+        }
+    }
+
+    for(auto state : phi_belief_state) {
+        for(auto var : state) {
+            std::cout << var << " ";
+        }
+
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
+    std::vector<std::vector<bool>> phi_belief_state_min_dist{  };
+
+    if (phi_belief_state.empty() || !test_announcement(agents, convert_raw(phi_belief_state))) {
+        return "No possible satisfying assignment was found\n";
+    }
+    else {
+        phi_belief_state_dnf = convert_raw(phi_belief_state);
+        simplify_dnf(phi_belief_state_dnf);
+        return print_formula_dnf(phi_belief_state_dnf);
         
     }
 
-    if (terms.empty()) {
-        return "Inconsistent Revising Formula for agents.";
-    }
-    else {
-        std::vector<int32_t> phi{};
-        for(const auto& term : terms) {
-            phi.push_back(term);
-        }
-        return print_formula_dnf(std::vector<std::vector<int32_t>> { phi });
-    }
 }
 
 std::string find_announcement(const std::vector<agent>& agents) noexcept {
@@ -280,27 +319,27 @@ int32_t get_variable_count(const std::vector<agent>& agents) noexcept {
 bool test_announcement(const std::vector<agent>& agents,
         const std::vector<std::vector<int32_t>>& revision_formula) noexcept {
     for (const auto& agent : agents) {
-        auto revised = belief_revise(agent.beliefs, revision_formula);
+        auto agentBeliefs = agent.beliefs;
+        auto revised = belief_revise(agentBeliefs, revision_formula);
         const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
         for (auto& clause : revised) {
             std::sort(clause.begin(), clause.end(), abs_cmp);
         }
         std::sort(revised.begin(), revised.end());
 
-        if (verbose) {
-            std::cout << "\n";
-            std::cout << "Agent beliefs: \n";
-            print_formula_dnf(agent.beliefs);
+        
+        std::cout << "\n";
+        std::cout << "Agent beliefs: ";
+        print_formula_dnf(agent.beliefs);
+    
+        std::cout << "Revision formula: ";
+        print_formula_dnf(revision_formula);
 
-            std::cout << "Revision formula: \n";
-            print_formula_dnf(revision_formula);
+        std::cout << "Revised output: "; 
+        print_formula_dnf(revised);
 
-            std::cout << "Revised output: \n";
-            print_formula_dnf(revised);
-
-            std::cout << "Agent goal: \n";
-            print_formula_dnf(agent.goal);
-        }
+        std::cout << "Agent goal: ";
+        print_formula_dnf(agent.goal);
 
         for (const auto& clause : revised) {
             if (std::find(agent.goal.cbegin(), agent.goal.cend(), clause) == agent.goal.cend()) {
