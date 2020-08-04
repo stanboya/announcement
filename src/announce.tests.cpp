@@ -31,7 +31,7 @@ TEST_CASE("get_dnf_from_equation") {
 }
 
 
-TEST_CASE("Basic Test") {
+TEST_CASE("Basic Failing Test 1") {
     std::string belief1str, belief2str, goal1str, goal2str;
 
     belief1str = "not 1 or 2";
@@ -241,7 +241,49 @@ TEST_CASE("Basic Test 5") {
     
 }
 
-TEST_CASE("Basic Failing Test") {
+
+TEST_CASE("Basic Test 6") {
+    std::string belief1str, belief2str, goal1str, goal2str;
+
+    belief1str = "(not 1 and 3) or (not 2 and 1)";
+    goal1str = "(1 and not 2 and not 3) or (1 and not 2 and 3)";
+    belief2str = "(not 1 and 2 and not 3) or (not 1 and 2 and 3) or (1 and 2 and not 3) or (1 and 2 and 3)";
+    goal2str = "(1 and 2 and not 3) or (1 and 2 and 3)";
+
+
+    std::vector<agent> agents{};
+
+    std::stringstream ss{shunting_yard(belief1str)};
+    std::vector<std::string> belief1_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    ss = std::stringstream{shunting_yard(goal1str)};
+    std::vector<std::string> goal1_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    agents.emplace_back(create_agent(belief1_tokens, goal1_tokens));
+
+    ss = std::stringstream{shunting_yard(belief2str)};
+    std::vector<std::string> belief2_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    ss = std::stringstream{shunting_yard(goal2str)};
+    std::vector<std::string> goal2_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
+
+    // SECTION("John's Implementation") {
+    //     REQUIRE(find_announcement(agents) == "(1 and 3)\n");
+    // }
+    
+    SECTION("Konstantin's Implementation") {
+        REQUIRE(find_announcement_KB(agents) == "(1)\n");
+    }
+    
+}
+
+TEST_CASE("Basic Failing Test 2") {
     std::string belief1str, belief2str, goal1str, goal2str;
 
     belief1str = "(not 1) or 2";

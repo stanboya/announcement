@@ -25,6 +25,7 @@
 #include <vector>
 #include <unordered_set>
 #include <bitset>
+#include <set>
 
 #include "announce.h"
 #include "interactive.h"
@@ -48,7 +49,29 @@ std::unordered_set<int32_t> get_terms_from_DNF(const std::vector<std::vector<int
         }
     }
 
+    
+
     return terms;
+}
+
+std::vector<std::vector<int32_t>> reduce_belief_state(std::vector<std::vector<int32_t>> belief_state) {
+    std::vector<std::vector<int32_t>> reduced_belief_state{};
+    std::set<std::vector<int32_t>> belief_state_set{};
+    auto terms = get_terms_from_DNF(belief_state);
+
+    for(auto state : belief_state) {
+        std::vector<int32_t> reduced_state{};
+        for(auto var : state) {
+            if(terms.find(var) != terms.end()) {
+                reduced_state.push_back(var);
+            }
+        }
+        belief_state_set.insert(reduced_state);
+    }
+
+    reduced_belief_state.assign(belief_state_set.begin(), belief_state_set.end());
+    
+    return reduced_belief_state;
 }
 
 std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
@@ -139,7 +162,10 @@ std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
         phi_belief_state_dnf = convert_raw(phi_belief_state);
         
         simplify_dnf(phi_belief_state_dnf);
-        return print_formula_dnf(minimize_output(phi_belief_state_dnf));
+
+        
+
+        return print_formula_dnf(reduce_belief_state(phi_belief_state_dnf));
         
     }
 

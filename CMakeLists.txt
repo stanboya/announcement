@@ -37,7 +37,7 @@ set(ANNOUNCE_SRCS
     src/interactive.h
     src/testing-main.cpp        # ONLY FOR TESTING
     # src/UI/mainwindow.h
-    # src/UI/mainwindow.cpp
+    #src/UI/mainwindow.cpp
     # src/UI/mainwindow.ui
     belief_revise/src/belief.cpp
 )

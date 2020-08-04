@@ -31,6 +31,7 @@ struct agent {
 
 std::string find_announcement(const std::vector<agent>& agents) noexcept;
 std::string find_announcement_KB(const std::vector<agent>& agents) noexcept;
+std::vector<std::vector<int32_t>> reduce_belief_state(std::vector<std::vector<int32_t>> belief_state);
 
 std::unordered_set<int32_t> get_terms_from_DNF(const std::vector<std::vector<int32_t>> clauses);
 
