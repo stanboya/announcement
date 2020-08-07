@@ -149,16 +149,7 @@ std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<in
     assert(!revision_formula.front().empty());
 
     //This is just needed to convert dnf formula into cnf input for belief revision
-    std::vector<std::vector<int32_t>> converted_form{};
-    for(size_t i = 0; i < revision_formula.front().size(); i++) {
-        std::vector<int32_t> cnf_clause{};
-        for (const auto clause : revision_formula) {
-            
-            cnf_clause.emplace_back(clause[i]);
-            
-        }
-        converted_form.emplace_back(std::move(cnf_clause));
-    }
+    std::vector<std::vector<int32_t>> converted_form{ convert_normal_forms(revision_formula) };
     
 
     assert(!bel.empty());

@@ -32,142 +32,66 @@
 #include "tools.h"
 #include "utils.h"
 
-std::unordered_set<int32_t> get_terms_from_DNF(const std::vector<std::vector<int32_t>> clauses) {
-    std::unordered_set<int32_t> terms{};
-    std::unordered_set<int32_t> removed_terms{};
-    for(const auto& clause : clauses) {
-        for(const auto term : clause) {
-            if(removed_terms.find(std::abs(term)) == removed_terms.end()) {
-                if(terms.find(-term) != terms.end()) {
-                    terms.erase(-term);
-                    removed_terms.insert(std::abs(term));
-                }
-                else {
-                    terms.insert(term);
-                }
-            }
-        }
-    }
-
-    
-
-    return terms;
-}
-
-std::vector<std::vector<int32_t>> reduce_belief_state(std::vector<std::vector<int32_t>> belief_state) {
-    std::vector<std::vector<int32_t>> reduced_belief_state{};
-    std::set<std::vector<int32_t>> belief_state_set{};
-    auto terms = get_terms_from_DNF(belief_state);
-
-    for(auto state : belief_state) {
-        std::vector<int32_t> reduced_state{};
-        for(auto var : state) {
-            if(terms.find(var) != terms.end()) {
-                reduced_state.push_back(var);
-            }
-        }
-        belief_state_set.insert(reduced_state);
-    }
-
-    reduced_belief_state.assign(belief_state_set.begin(), belief_state_set.end());
-    
-    return reduced_belief_state;
-}
 
 std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
 
     std::vector<std::vector<int32_t>> phi_belief_state_dnf{};
-    
     std::vector<unsigned long> minimum_hamming_distances{};
     
-
     std::vector<std::vector<std::vector<bool>>> K_beliefs{}, G_beliefs{};
     for(const auto& agent : agents) {
-        std::vector<std::vector<int32_t>> agentBelief_converted_form{};
-        for(size_t i = 0; i < agent.beliefs.front().size(); i++) {
-            std::vector<int32_t> cnf_clause{};
-            for (const auto clause : agent.beliefs) {
-                
-                cnf_clause.emplace_back(clause[i]);
-                
-            }
-            agentBelief_converted_form.emplace_back(std::move(cnf_clause));
-        }
-        K_beliefs.push_back(convert_dnf_to_raw(allsat(agentBelief_converted_form)));
-        print_formula_dnf(agent.goal);
-
-        std::vector<std::vector<int32_t>> agentGoal_converted_form{};
-        for(size_t i = 0; i < agent.goal.front().size(); i++) {
-            std::vector<int32_t> cnf_clause{};
-            for (const auto clause : agent.goal) {
-                
-                cnf_clause.emplace_back(clause[i]);
-                
-            }
-            agentGoal_converted_form.emplace_back(std::move(cnf_clause));
-        }
-        G_beliefs.push_back(convert_dnf_to_raw(allsat(agentGoal_converted_form)));
+        K_beliefs.push_back(convert_dnf_to_raw(allsat(convert_normal_forms(agent.beliefs))));
+        G_beliefs.push_back(convert_dnf_to_raw(allsat(convert_normal_forms(agent.goal))));
     }
 
-    
-
-    for(size_t i{ 0 }; i < K_beliefs.size(); i++) {
-        
-        unsigned long minimumHammingDistance{ std::numeric_limits<unsigned long>::max() };
-        for(const auto& G_belief : G_beliefs[i]) {
-            
-            auto hamming_distance = state_difference(G_belief, K_beliefs[i]);
-            
-            if(minimumHammingDistance > hamming_distance) {
-                minimumHammingDistance = hamming_distance;
-            }
-        }
-
-        minimum_hamming_distances.push_back(minimumHammingDistance);
-    }
-
-    
-    
     std::vector<std::vector<bool>> phi_belief_state{};
     for(size_t i{ 0 }; i < G_beliefs.size(); i++) {
-
         for(const auto& state : G_beliefs[i]) {
             if(std::find(phi_belief_state.begin(), phi_belief_state.end(), state) == phi_belief_state.end()) {
-                // bool state_possible{ true };
-                // for(size_t j = 0; j < K_beliefs.size(); j++) {
-                //     if(state_difference(state, K_beliefs[j]) == minimum_hamming_distances[j] && std::find(G_beliefs[j].begin(), G_beliefs[j].end(), state) == G_beliefs[j].end()) {
-                //         return "No possible satisfying assignment was found\n";
-                //     }
-                // }
-                // if(state_possible) {
-                    phi_belief_state.push_back(state);
-                // }    
+                phi_belief_state.push_back(state); 
             }
         }
     }
 
-    for(auto state : phi_belief_state) {
-        for(auto var : state) {
-            std::cout << var << " ";
-        }
-
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-    
-    if (phi_belief_state.empty() || !test_announcement(agents, convert_raw(phi_belief_state))) {
+    if(phi_belief_state.empty()) {
         return "No possible satisfying assignment was found\n";
     }
-    else {
-        phi_belief_state_dnf = convert_raw(phi_belief_state);
-        
-        simplify_dnf(phi_belief_state_dnf);
 
-        
-
-        return print_formula_dnf(reduce_belief_state(phi_belief_state_dnf));
-        
+    std::vector<std::vector<std::vector<bool>>> phi_belief_state_all_comb{};
+    for(size_t i{ 1 }; i <= phi_belief_state.size(); i++) {
+        for(size_t j{ 0 }; j < phi_belief_state.size(); j++) {
+            std::vector<std::vector<bool>> belief_state{};
+            if((i + j) > phi_belief_state.size()) {
+                break;
+            }
+            for(size_t k{ 0 }; k < i; k++) {
+                belief_state.push_back(phi_belief_state[j + k]);
+            }
+            if(!belief_state.empty()) {
+                phi_belief_state_all_comb.push_back(belief_state);
+            }   
+            
+        }
     }
+
+    for(const auto& belief_state : phi_belief_state_all_comb) {
+        auto belief_state_dnf = convert_raw(belief_state);
+        if(test_announcement(agents, belief_state_dnf)) {
+        
+            simplify_dnf(belief_state_dnf);
+
+            auto prev_belief_state = belief_state_dnf;
+            do {
+                prev_belief_state = belief_state_dnf;
+                belief_state_dnf = minimize_output(belief_state_dnf);
+
+            } while(prev_belief_state != belief_state_dnf);
+
+            return print_formula_dnf(belief_state_dnf);
+        }
+    }
+
+    return "No possible satisfying assignment was found\n";
 
 }
 
@@ -398,8 +322,15 @@ bool test_announcement(const std::vector<agent>& agents,
             return false;
         }
 
-        for (const auto& clause : revised) {
-            if (std::find(agent.goal.cbegin(), agent.goal.cend(), clause) == agent.goal.cend()) {
+        std::sort(revised.begin(), revised.end());
+        auto agent_goal = agent.goal;
+        std::sort(agent_goal.begin(), agent_goal.end());
+
+        if(agent_goal.size() != revised.size()) {
+            return false;
+        }
+        for (size_t i{ 0 }; i < revised.size(); i ++) {
+            if(agent_goal[i] != revised[i]) {
                 return false;
             }
         }

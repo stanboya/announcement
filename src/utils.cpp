@@ -102,7 +102,15 @@ std::vector<std::vector<int32_t>> convert_normal_forms(
         std::cout << "Conversion called with size " << normal_clauses.size() << "\n";
     }
 
-    assert(normal_clauses.size() != 1);
+
+    
+    if(normal_clauses.size() == 1) {
+
+        for(auto normal_clause : normal_clauses.back()) {
+            result.push_back(std::vector<int32_t>{ normal_clause });
+        }
+        return result;
+    }
 
     if (normal_clauses.size() == 2) {
         //Handle final case
