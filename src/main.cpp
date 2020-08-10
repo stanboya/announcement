@@ -26,6 +26,8 @@
 #include <sstream>
 #include <unistd.h>
 #include <variant>
+#include <chrono>
+#include "stopwatch/stopwatch.hpp"
 
 #include "UI/mainwindow.h"
 #include "announce.h"
@@ -64,7 +66,7 @@ int main(int argc, char** argv) {
                 break;
             case 't':
                 agent_count = strtol(optarg, NULL, 10);
-                if (agent_count > 64 || agent_count <= 1) {
+                if (agent_count > 64 || agent_count < 1) {
                     agent_count = 0;
                 }
                 break;
@@ -126,13 +128,13 @@ int main(int argc, char** argv) {
         }
         return EXIT_SUCCESS;
     }
-    if (agent_count > 1) {
+    if (agent_count > 0) {
         std::vector<agent> agent_list;
         std::stringstream belief;
         for (int i = 0; i < agent_count; ++i) {
             belief << (i + 1);
             if (i < (agent_count - 1)) {
-                belief << " and ";
+                belief << " or ";
             }
         }
         std::stringstream ss{shunting_yard(belief.str())};
@@ -155,7 +157,16 @@ int main(int argc, char** argv) {
 
             agent_list.push_back({agent_belief, get_dnf_from_equation(goal_tokens)});
         }
-        find_announcement_KB(agent_list);
+        std::cout << std::endl;
+        std::chrono::nanoseconds elapsed_ns;
+        {
+            Stopwatch stopwatch{ elapsed_ns };
+            std::cout << find_announcement_KB(agent_list);
+        }
+
+        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_ns).count();
+        std::cout << "Time Taken: " << elapsed_ms << "ms" << "\n";
+        
         return EXIT_SUCCESS;
     }
 

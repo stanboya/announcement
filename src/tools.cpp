@@ -156,14 +156,14 @@ std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<in
     assert(!converted_form.empty());
     
 
-    for(auto cnf_state : converted_form) {
-        std::cout << "(";
-        for(auto var : cnf_state) {
-            std::cout << var << " or ";
-        }
-        std::cout << ") and ";
-    }
-    std::cout << std::endl;
+    // for(auto cnf_state : converted_form) {
+    //     std::cout << "(";
+    //     for(auto var : cnf_state) {
+    //         std::cout << var << " or ";
+    //     }
+    //     std::cout << ") and ";
+    // }
+    // std::cout << std::endl;
 
     return revise_beliefs(bel, converted_form, {}, nullptr);
 

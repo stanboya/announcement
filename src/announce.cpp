@@ -40,8 +40,8 @@ std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
     
     std::vector<std::vector<std::vector<bool>>> K_beliefs{}, G_beliefs{};
     for(const auto& agent : agents) {
-        K_beliefs.push_back(convert_dnf_to_raw(allsat(convert_normal_forms(agent.beliefs))));
-        G_beliefs.push_back(convert_dnf_to_raw(allsat(convert_normal_forms(agent.goal))));
+        K_beliefs.push_back(convert_dnf_to_raw(agent.beliefs));
+        G_beliefs.push_back(convert_dnf_to_raw(agent.goal));
     }
 
     std::vector<std::vector<bool>> phi_belief_state{};
@@ -51,6 +51,18 @@ std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
                 phi_belief_state.push_back(state); 
             }
         }
+    }
+
+    if(agents.size() == 1) {
+        auto belief_state_dnf = convert_raw(phi_belief_state);
+        simplify_dnf(belief_state_dnf);
+        auto prev_belief_state = belief_state_dnf;
+            do {
+                prev_belief_state = belief_state_dnf;
+                belief_state_dnf = minimize_output(belief_state_dnf);
+
+            } while(prev_belief_state != belief_state_dnf);
+        return print_formula_dnf(belief_state_dnf);
     }
 
     if(phi_belief_state.empty()) {
@@ -73,6 +85,8 @@ std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
             
         }
     }
+
+    std::sort(phi_belief_state_all_comb.begin(), phi_belief_state_all_comb.end());
 
     for(const auto& belief_state : phi_belief_state_all_comb) {
         auto belief_state_dnf = convert_raw(belief_state);
@@ -297,12 +311,31 @@ bool test_announcement(const std::vector<agent>& agents,
         auto agentBeliefs = agent.beliefs;
         
         auto revised = belief_revise(agentBeliefs, revision_formula);
+
+        
+        auto agent_goal = agent.goal;
+
+        if(revised.empty() && !agent_goal.empty()) {
+            return false;
+        }
+
+        auto prev_belief_state = revised;
+
+        do {
+            prev_belief_state = revised;
+            revised = minimize_output(revised);
+        } while(prev_belief_state != revised);
+
+        do {
+            prev_belief_state = agent_goal;
+            agent_goal = minimize_output(agent_goal);
+        } while(prev_belief_state != agent_goal);
+
         const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
         
         for (auto& clause : revised) {
             std::sort(clause.begin(), clause.end(), abs_cmp);
         }
-        std::sort(revised.begin(), revised.end());
 
         
         std::cout << "\n";
@@ -316,14 +349,11 @@ bool test_announcement(const std::vector<agent>& agents,
         print_formula_dnf(revised);
 
         std::cout << "Agent goal: ";
-        print_formula_dnf(agent.goal);
+        print_formula_dnf(agent_goal);
 
-        if(revised.empty() && !agent.goal.empty()) {
-            return false;
-        }
+        
 
         std::sort(revised.begin(), revised.end());
-        auto agent_goal = agent.goal;
         std::sort(agent_goal.begin(), agent_goal.end());
 
         if(agent_goal.size() != revised.size()) {
