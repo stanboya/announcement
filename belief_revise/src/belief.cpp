@@ -269,12 +269,14 @@ unsigned long pd_hamming_bitset(const std::bitset<512>& state,
 
 //The main revision function
 //Original beliefs must contain equal length bit assignments representing the state of each variable
-//The formula must be in CNF format
+//The formula must be in DNF format
 std::vector<std::vector<int32_t>> revise_beliefs(std::vector<std::vector<bool>>& original_beliefs,
         const std::vector<std::vector<int32_t>>& formula,
         const std::unordered_map<int32_t, unsigned long> orderings,
         const char* output_file) noexcept {
-    auto formula_states = generate_states(formula, original_beliefs.front().size());
+    auto formula_states = convert_dnf_to_raw(formula);
+
+    formula_states.shrink_to_fit();
     if (formula_states.empty()) {
         std::cerr << "Formula is unsatisfiable\n";
         exit(EXIT_FAILURE);
@@ -284,14 +286,10 @@ std::vector<std::vector<int32_t>> revise_beliefs(std::vector<std::vector<bool>>&
 
     std::vector<std::vector<bool>> revised_beliefs;
 
-    
+    std::sort(formula_states.begin(), formula_states.end());
 
-    if (!std::is_sorted(formula_states.begin(), formula_states.end())) {
-        std::sort(formula_states.begin(), formula_states.end());
-    }
-    if (!std::is_sorted(original_beliefs.begin(), original_beliefs.end())) {
-        std::sort(original_beliefs.begin(), original_beliefs.end());
-    }
+    std::sort(original_beliefs.begin(), original_beliefs.end());
+    
 
     std::cout << "Done sorting\n";
 
@@ -429,55 +427,19 @@ minimize:
     std::cout << "Minimization is possible\n";
 
     std::cout << "Initial pre-minimized state size: " << revised_beliefs.size() << "\n";
-
-    auto minimized = minimize_output(convert_to_num(revised_beliefs));
     
-    for (;;) {
-        unsigned long old_size = minimized.size();
+    auto original_belief_state = convert_to_num(revised_beliefs);
+    auto prev_belief_state = original_belief_state;
+    
+    do {
+        original_belief_state.shrink_to_fit();
+        prev_belief_state = original_belief_state;
+        original_belief_state = minimize_output(original_belief_state);
+    } while(prev_belief_state != original_belief_state);
 
-        std::cout << "Minimized Size: " << old_size << "\n";
-        unsigned long long old_sum = 0;
-        for (const auto& clause : minimized) {
-            old_sum += clause.size();
-        }
-
-        if(old_size != 0) {
-            std::cout << "Average clause size: " << (old_sum / old_size) << "\n";
-        }
-        else {
-            std::cout << "Old size is 0. Cannot calculate average clause size." << "\n";
-            return std::vector<std::vector<int32_t>>{};
-        }
-        
-
-        minimized = minimize_output(minimized);
-
-        unsigned long long new_sum = 0;
-        for (const auto& clause : minimized) {
-            new_sum += clause.size();
-        }
-
-        if (old_size == minimized.size() && new_sum == old_sum) {
-            minimized = minimize_output(minimized);
-            //Print minimized
-            std::cout << "Minimized states:\n";
-            if (verbose) {
-                for (const auto& belief : minimized) {
-                    for (const auto term : belief) {
-                        std::cout << term << " ";
-                    }
-                    std::cout << "\n";
-                }
-            }
-            print_formula_dnf(minimized);
-            break;
-        }
-        for (auto& clause : minimized) {
-            clause.shrink_to_fit();
-        }
-        minimized.shrink_to_fit();
-    }
-    return convert_to_num(revised_beliefs);
+    original_belief_state.shrink_to_fit();
+    
+    return original_belief_state;
 }
 
 

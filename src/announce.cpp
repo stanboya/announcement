@@ -87,9 +87,11 @@ std::string find_announcement_KB(const std::vector<agent>& agents) noexcept {
     }
 
     std::sort(phi_belief_state_all_comb.begin(), phi_belief_state_all_comb.end());
+    phi_belief_state_all_comb.shrink_to_fit();
 
     for(const auto& belief_state : phi_belief_state_all_comb) {
         auto belief_state_dnf = convert_raw(belief_state);
+        
         if(test_announcement(agents, belief_state_dnf)) {
         
             simplify_dnf(belief_state_dnf);
@@ -309,9 +311,9 @@ bool test_announcement(const std::vector<agent>& agents,
     
     for (const auto& agent : agents) {
         auto agentBeliefs = agent.beliefs;
-        
+        agentBeliefs.shrink_to_fit();
         auto revised = belief_revise(agentBeliefs, revision_formula);
-
+        
         
         auto agent_goal = agent.goal;
 
@@ -322,19 +324,31 @@ bool test_announcement(const std::vector<agent>& agents,
         auto prev_belief_state = revised;
 
         do {
+            revised.shrink_to_fit();
             prev_belief_state = revised;
             revised = minimize_output(revised);
         } while(prev_belief_state != revised);
 
         do {
+            agent_goal.shrink_to_fit();
             prev_belief_state = agent_goal;
             agent_goal = minimize_output(agent_goal);
         } while(prev_belief_state != agent_goal);
+
+        if(agent_goal.size() != revised.size()) {
+            return false;
+        }
 
         const auto abs_cmp = [](const auto a, const auto b) { return std::abs(a) < std::abs(b); };
         
         for (auto& clause : revised) {
             std::sort(clause.begin(), clause.end(), abs_cmp);
+            clause.shrink_to_fit();
+        }
+
+        for (auto& clause : agent_goal) {
+            std::sort(clause.begin(), clause.end(), abs_cmp);
+            clause.shrink_to_fit();
         }
 
         
@@ -356,14 +370,17 @@ bool test_announcement(const std::vector<agent>& agents,
         std::sort(revised.begin(), revised.end());
         std::sort(agent_goal.begin(), agent_goal.end());
 
-        if(agent_goal.size() != revised.size()) {
-            return false;
-        }
-        for (size_t i{ 0 }; i < revised.size(); i ++) {
+        revised.shrink_to_fit();
+        agent_goal.shrink_to_fit();
+        
+        for (size_t i{ 0 }; i < revised.size(); i++) {
+            
             if(agent_goal[i] != revised[i]) {
                 return false;
             }
         }
+
+        
     }
     return true;
 }

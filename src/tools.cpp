@@ -146,14 +146,14 @@ std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<in
     auto bel = convert_dnf_to_raw(beliefs);
 
     assert(revision_formula.size() == 1);
-    assert(!revision_formula.front().empty());
+    assert(!revision_formula.empty());
 
     //This is just needed to convert dnf formula into cnf input for belief revision
-    std::vector<std::vector<int32_t>> converted_form{ convert_normal_forms(revision_formula) };
+    // std::vector<std::vector<int32_t>> converted_form{ convert_normal_forms(revision_formula) };
     
 
     assert(!bel.empty());
-    assert(!converted_form.empty());
+    // assert(!converted_form.empty());
     
 
     // for(auto cnf_state : converted_form) {
@@ -165,7 +165,7 @@ std::vector<std::vector<int32_t>> belief_revise(const std::vector<std::vector<in
     // }
     // std::cout << std::endl;
 
-    return revise_beliefs(bel, converted_form, {}, nullptr);
+    return revise_beliefs(bel, revision_formula, {}, nullptr);
 
 #else
     const char *input_filename = ".tmp.input";

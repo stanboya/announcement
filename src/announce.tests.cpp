@@ -424,9 +424,17 @@ TEST_CASE("Timed Test (1 Variables)") {
             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
 
     agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
-
+    
     SECTION("Konstantin's Implementation") {
-        REQUIRE(find_announcement_KB(agents) == "(1)\n");
+
+        std::chrono::nanoseconds elapsed_ns;
+        {
+                Stopwatch stopwatch{ elapsed_ns };
+                REQUIRE(find_announcement_KB(agents) == "(1)\n");
+        }
+
+        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_ns).count();
+        std::cout << "Time Taken: " << elapsed_ms << "ms" << "\n";
     }
     
 }
@@ -464,7 +472,14 @@ TEST_CASE("Timed Test (2 Variables)") {
     agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
 
     SECTION("Konstantin's Implementation") {
-        REQUIRE(find_announcement_KB(agents) == "(2)\n");
+        std::chrono::nanoseconds elapsed_ns;
+        {
+                Stopwatch stopwatch{ elapsed_ns };
+                REQUIRE(find_announcement_KB(agents) == "(2)\n");
+        }
+
+        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_ns).count();
+        std::cout << "Time Taken: " << elapsed_ms << "ms" << "\n";
     }
     
 }
@@ -502,7 +517,14 @@ TEST_CASE("Timed Test (3 Variables)") {
     agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
 
     SECTION("Konstantin's Implementation") {
-        REQUIRE(find_announcement_KB(agents) == "(3)\n");
+        std::chrono::nanoseconds elapsed_ns;
+        {
+                Stopwatch stopwatch{ elapsed_ns };
+                REQUIRE(find_announcement_KB(agents) == "(3)\n");
+        }
+
+        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_ns).count();
+        std::cout << "Time Taken: " << elapsed_ms << "ms" << "\n";
     }
     
 }
@@ -540,7 +562,14 @@ TEST_CASE("Timed Test (4 Variables)") {
     agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
 
     SECTION("Konstantin's Implementation") {
-        REQUIRE(find_announcement_KB(agents) == "(4)\n");
+        std::chrono::nanoseconds elapsed_ns;
+        {
+                Stopwatch stopwatch{ elapsed_ns };
+                REQUIRE(find_announcement_KB(agents) == "(4)\n");
+        }
+
+        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_ns).count();
+        std::cout << "Time Taken: " << elapsed_ms << "ms" << "\n";
     }
     
 }
@@ -579,19 +608,25 @@ TEST_CASE("Timed Test (5 Variables)") {
     agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
 
     SECTION("Konstantin's Implementation") {
-        REQUIRE(find_announcement_KB(agents) == "(5)\n");
+        std::chrono::nanoseconds elapsed_ns;
+        {
+                Stopwatch stopwatch{ elapsed_ns };
+                REQUIRE(find_announcement_KB(agents) == "(5)\n");
+        }
+
+        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_ns).count();
+        std::cout << "Time Taken: " << elapsed_ms << "ms" << "\n";
     }
     
 }
-
 
 TEST_CASE("Timed Test (6 Variables)") {
     std::string belief1str, belief2str, goal1str, goal2str;
 
     belief1str = "(1 and 2 and 3 and 4 and 5 and 6)";
     goal1str = "(1 and 2 and 3 and 4 and 5 and 6)";
-    belief2str = "(1 and 2 and 3 and 4 and 5 and 6) or 5";
-    goal2str = "5";
+    belief2str = "(not 1 and 2 and 3 and 4 and 5 and 6) or 6";
+    goal2str = "6";
 
 
 
@@ -618,8 +653,196 @@ TEST_CASE("Timed Test (6 Variables)") {
     agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
 
     SECTION("Konstantin's Implementation") {
-        REQUIRE(find_announcement_KB(agents) == "(5)\n");
+        std::chrono::nanoseconds elapsed_ns;
+        {
+                Stopwatch stopwatch{ elapsed_ns };
+                REQUIRE(find_announcement_KB(agents) == "(6)\n");
+        }
+
+        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_ns).count();
+        std::cout << "Time Taken: " << elapsed_ms << "ms" << "\n";
     }
     
 }
+
+TEST_CASE("Timed Test (7 Variables)") {
+    std::string belief1str, belief2str, goal1str, goal2str;
+
+    belief1str = "(1 and 2 and 3 and 4 and 5 and 6 and 7)";
+    goal1str = "(1 and 2 and 3 and 4 and 5 and 6 and 7)";
+    belief2str = "(not 1 and 2 and 3 and 4 and 5 and 6 and 7) or 7";
+    goal2str = "7";
+
+
+
+    std::vector<agent> agents{};
+
+    std::stringstream ss{shunting_yard(belief1str)};
+    std::vector<std::string> belief1_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    ss = std::stringstream{shunting_yard(goal1str)};
+    std::vector<std::string> goal1_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    agents.push_back(create_agent(belief1_tokens, goal1_tokens));
+
+    ss = std::stringstream{shunting_yard(belief2str)};
+    std::vector<std::string> belief2_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    ss = std::stringstream{shunting_yard(goal2str)};
+    std::vector<std::string> goal2_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
+
+    SECTION("Konstantin's Implementation") {
+        std::chrono::nanoseconds elapsed_ns;
+        {
+                Stopwatch stopwatch{ elapsed_ns };
+                REQUIRE(find_announcement_KB(agents) == "(7)\n");
+        }
+        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_ns).count();
+        std::cout << "Time Taken: " << elapsed_ms << "ms" << "\n";
+
+    }
+    
+}
+
+// TEST_CASE("Timed Test (8 Variables)") {
+//     std::string belief1str, belief2str, goal1str, goal2str;
+
+//     belief1str = "(1 and 2 and 3 and 4 and 5 and 6 and 7 and 8)";
+//     goal1str = "(1 and 2 and 3 and 4 and 5 and 6 and 7 and 8)";
+//     belief2str = "(not 1 and 2 and 3 and 4 and 5 and 6 and 7 and 8) or 8";
+//     goal2str = "8";
+
+
+
+//     std::vector<agent> agents{};
+
+//     std::stringstream ss{shunting_yard(belief1str)};
+//     std::vector<std::string> belief1_tokens{
+//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+//     ss = std::stringstream{shunting_yard(goal1str)};
+//     std::vector<std::string> goal1_tokens{
+//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+//     agents.push_back(create_agent(belief1_tokens, goal1_tokens));
+
+//     ss = std::stringstream{shunting_yard(belief2str)};
+//     std::vector<std::string> belief2_tokens{
+//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+//     ss = std::stringstream{shunting_yard(goal2str)};
+//     std::vector<std::string> goal2_tokens{
+//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+//     agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
+
+//     SECTION("Konstantin's Implementation") {
+//         std::chrono::nanoseconds elapsed_ns;
+//         {
+//                 Stopwatch stopwatch{ elapsed_ns };
+//                 REQUIRE(find_announcement_KB(agents) == "(8)\n");
+//         }
+//         const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_ns).count();
+//         std::cout << "Time Taken: " << elapsed_ms << "ms" << "\n";
+
+//     }
+    
+// }
+
+// TEST_CASE("Timed Test (9 Variables)") {
+//     std::string belief1str, belief2str, goal1str, goal2str;
+
+//     belief1str = "(1 and 2 and 3 and 4 and 5 and 6 and 7 and 8 and 9)";
+//     goal1str = "(1 and 2 and 3 and 4 and 5 and 6 and 7 and 8 and 9)";
+//     belief2str = "(not 1 and 2 and 3 and 4 and 5 and 6 and 7 and 8 and 9) or 9";
+//     goal2str = "9";
+
+
+
+//     std::vector<agent> agents{};
+
+//     std::stringstream ss{shunting_yard(belief1str)};
+//     std::vector<std::string> belief1_tokens{
+//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+//     ss = std::stringstream{shunting_yard(goal1str)};
+//     std::vector<std::string> goal1_tokens{
+//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+//     agents.push_back(create_agent(belief1_tokens, goal1_tokens));
+
+//     ss = std::stringstream{shunting_yard(belief2str)};
+//     std::vector<std::string> belief2_tokens{
+//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+//     ss = std::stringstream{shunting_yard(goal2str)};
+//     std::vector<std::string> goal2_tokens{
+//             std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+//     agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
+
+//     SECTION("Konstantin's Implementation") {
+//         std::chrono::nanoseconds elapsed_ns;
+//         {
+//                 Stopwatch stopwatch{ elapsed_ns };
+//                 REQUIRE(find_announcement_KB(agents) == "(9)\n");
+//         }
+//         const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_ns).count();
+//         std::cout << "Time Taken: " << elapsed_ms << "ms" << "\n";
+
+//     }
+    
+// }
+
+TEST_CASE("Timed Test (10 Variables)") {
+    std::string belief1str, belief2str, goal1str, goal2str;
+
+    belief1str = "(1 and 2 and 3 and 4 and 5 and 6 and 7 and 8 and 9 and 10)";
+    goal1str = "(1 and 2 and 3 and 4 and 5 and 6 and 7 and 8 and 9 and 10)";
+    belief2str = "(not 1 and 2 and 3 and 4 and 5 and 6 and 7 and 8 and 9 and 10) or 10";
+    goal2str = "10";
+
+
+
+    std::vector<agent> agents{};
+
+    std::stringstream ss{shunting_yard(belief1str)};
+    std::vector<std::string> belief1_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    ss = std::stringstream{shunting_yard(goal1str)};
+    std::vector<std::string> goal1_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    agents.push_back(create_agent(belief1_tokens, goal1_tokens));
+
+    ss = std::stringstream{shunting_yard(belief2str)};
+    std::vector<std::string> belief2_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    ss = std::stringstream{shunting_yard(goal2str)};
+    std::vector<std::string> goal2_tokens{
+            std::istream_iterator<std::string>{ss}, std::istream_iterator<std::string>{}};
+
+    agents.emplace_back(create_agent(belief2_tokens, goal2_tokens));
+
+    SECTION("Konstantin's Implementation") {
+        std::chrono::nanoseconds elapsed_ns;
+        {
+                Stopwatch stopwatch{ elapsed_ns };
+                REQUIRE(find_announcement_KB(agents) == "(10)\n");
+        }
+        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_ns).count();
+        std::cout << "Time Taken: " << elapsed_ms << "ms" << "\n";
+
+    }
+    
+}
+
 

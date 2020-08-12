@@ -48,4 +48,6 @@ std::vector<std::vector<int32_t>> revise_beliefs(std::vector<std::vector<bool>>&
 std::vector<std::vector<int32_t>> minimize_output(
         const std::vector<std::vector<int32_t>>& original_terms) noexcept;
 
+std::vector<std::vector<bool>> convert_dnf_to_raw(const std::vector<std::vector<int32_t>>& clause_list) noexcept;
+
 #endif
